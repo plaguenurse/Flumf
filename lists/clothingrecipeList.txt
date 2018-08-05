@@ -1,0 +1,3 @@
+2-Hats,images/craftables/2hats.png,1,bow,1,spool,1
+glasses,images/craftables/glasses.png,1,tape,2,paperclip,2
+4-socks,images/craftables/4socks.png,1,sock,2
