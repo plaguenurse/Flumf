@@ -24,6 +24,12 @@ int main(void)
 	Image * adventureButton,*craftButton,*leftArrow,*rightArrow,*upArrow,*downArrow, *close, *forgeButton, *natureButton;
 	Image * statusButton, *flumfButton, *upgradeButton;
 	Image * levelBar, *forgeSlice, *forgeLeftMenu, *tinyResources, *palLevelOutline, * ordering;
+	double flumfAuto = 0;
+	Image * dirtPile, *growing, *grown, *shadowLeftMenu;
+	SDL_Rect tempRect;
+	int growTimer = 0;
+	Item * growItem = NULL;
+	
 	int levels[5]={0};
 
 	Image * selectionMenu;
@@ -32,7 +38,7 @@ int main(void)
 
 	int scrollmin = 2048;
 	
-	double desireMods = 0;
+	double desireMods = 1;
 	
 	int enemyTimer = 400;
 	int enemyTimerMax = 400;
@@ -65,7 +71,7 @@ int main(void)
 	int houseNum = 0;
 
 	long long int flumfEntropy = 0;
-	long long int flumfDesire = 16;
+	double flumfDesire = 16;
 	Image * cursor;
 	
 	SDL_Rect temprect;
@@ -110,16 +116,10 @@ int main(void)
 	
 	activatedUpgrades = calloc(sizeof(char),upgradeList->size);
 	
-	fprintf(stderr,"Initialized House list\n");
 
 	palsPullingPals = malloc(sizeof(Adventurer*)*palpullcapacity);
 	
 	
-	
-	fprintf(stderr,"Initialized pile\n");
-	
-	fprintf(stderr,"Initialized Buttons\n");
-
 	
 	background = loadImage("images/background.png",1,1,game);
 	forgeInfo = loadImage("images/forge-types.png",5,1,game);
@@ -162,7 +162,11 @@ int main(void)
 	selectionMenu = loadImage("images/buttons/selection.png", 3, 2,game);
 	ordering = loadImage("images/buttons/ordering.png", 2, 2,game);
 	
-	fprintf(stderr,"Initialized misc. images\n");
+	dirtPile = loadImage("images/dirt-pile.png", 1,1,game);
+	growing = loadImage("images/leaf1.png", 1,1,game);
+	grown = loadImage("images/leaf2.png", 1,1,game);
+	
+	shadowLeftMenu = loadImage("images/left-menu-overlay.png",1,1,game);
 
 	font = newFont(loadImage("images/font.png",13,5,game));
 
@@ -177,7 +181,6 @@ int main(void)
 	moveImageTo(natureButton,(natureButton->w+10),(natureButton->h+10));
 	
 	itemList = getList("lists/itemList.txt",game);
-	fprintf(stderr,"Initialized Item list - Main loop start\n");
 	housey = background->h-119;
 	
 	enemylist=malloc(sizeof(Enemy*)*enemylistcapacity);
@@ -274,7 +277,6 @@ int main(void)
 		{
 			if(usefulstrcmp(temp,"eggs"))
 			{
-				fprintf(stderr,"Loading eggs\n");
 				sscanf(temp,"eggs %d",&eggSize);
 				visEggSize = eggSize;
 				queuedEggs = malloc(sizeof(Adventurer*)*eggSize);
@@ -283,40 +285,80 @@ int main(void)
 					queuedEggs[i] = newAdventurer(1,game);
 				}
 			}
+			else if(usefulstrcmp(temp,"flumf"))
+			{
+						sscanf(temp,"flumf %lld %lf\n",&flumfEntropy,&flumfDesire);
+
+			}
 			else if(usefulstrcmp(temp,"resources"))
 			{
 				sscanf(temp,"resources %d %d %d %d %d",&(levels[0]),&(levels[1]),&(levels[2]),&(levels[3]),&(levels[4]));
 			}
+			else if(usefulstrcmp(temp,"upgrade"))
+			{
+				int upgrade;
+				sscanf(temp,"upgrade %d",&upgrade);
+				upgradeList->list[upgrade-1]->unlocked=0;
+				if(upgrade==1)
+				{
+					moxieBonus += 2;	
+				}
+				else if(upgrade==2)
+				{
+					desireMods += .25;	
+				}
+				activatedUpgrades[upgrade-1] = 1;
+			}
 			else if(usefulstrcmp(temp,"item"))
 			{
-				fprintf(stderr,"Loading item\n");
 				sscanf(temp,"item %s",tempItem);
 				putInPile(pile,getItemByName(tempItem,itemList));
 			}
 			else if(usefulstrcmp(temp,"house"))
 			{
-				int houseType, numPalsinHouse;
-				fprintf(stderr,"Loading house\n");
+				char houseName[80];
+				int numPalsinHouse;
 
-				sscanf(temp,"house %d %d %d %d",&houseType,&numPalsinHouse,&housex,&housey);
+				sscanf(temp,"house %s %d %d %d",houseName,&numPalsinHouse,&housex,&housey);
 				houseNum++;
-				if(houseType==1)
+				houseList = realloc(houseList,sizeof(House*)*houseNum);
+				houseList[houseNum-1] = newHouseByName(game,housex,housey,houseName);
+				totalCapacity+=houseList[houseNum-1]->capacity;
+				if(houseList[houseNum-1]->type==1)
 				{
 					unlockTier(2,recipeList);
 					unlockTier(3,recipeList);
-					recipeList->list[0]->unlocked=0;
+					unlockHouse(recipeList, houseName,0); 
 					hasForge=1;
 					wonderModifier++;
 				}
-				if(houseType == 8)
+				if(houseList[houseNum-1]->type == 4)
 				{
-					recipeList->list[7]->unlocked = 0;
+					specialization = 1;
+					lockTier(3,recipeList);
+				}
+				if(houseList[houseNum-1]->type == 5)
+				{
+					specialization = 2;
+					lockTier(3,recipeList);
+				}
+				if(houseList[houseNum-1]->type == 6)
+				{
+					specialization = 4;
+					lockTier(3,recipeList);
+				}
+				if(houseList[houseNum-1]->type == 9)
+				{
+					specialization = 3;
+					lockTier(3,recipeList);
+				}
+				if(houseList[houseNum-1]->type == 8)
+				{
+					unlockHouse(recipeList, houseName,0);
 					wonderModifier++;
 					hasUpgrade = 1;
 				}
-				houseList = realloc(houseList,sizeof(House*)*houseNum);
-				houseList[houseNum-1] = newHouse(game,housex,housey,houseType);
-				totalCapacity+=houseList[houseNum-1]->capacity;
+			
 			
 				for(i = 0; i < numPalsinHouse;i++)
 				{
@@ -470,6 +512,32 @@ int main(void)
 				}
 			}
 			clickable = 1;
+		}
+		
+		if(currOutPals/currTotalPals < flumfAuto)
+		{
+
+			for(i=0;i<houseNum;i++)
+			{
+				for(k=0;k<houseList[i]->size;k++)
+				{
+					if(houseList[i]->pals[k]->status == 0)
+					{
+						houseList[i]->pals[k]->status = 1;
+						houseList[i]->pals[k]->timer = 50;
+						houseList[i]->pals[k]->delay = 5*j;
+						chutzpahGravyBoat += getChutzpah(houseList[i]->pals[k]);
+						wonderTeaSet +=getWonder(houseList[i]->pals[k]);
+						currOutPals++;
+						currExploringPals++;
+						if(currOutPals*1.0/currTotalPals >= flumfAuto)
+							break;
+					}
+				}
+				if(currOutPals*1.0/currTotalPals >= flumfAuto)
+							break;
+			}
+	
 		}
 		
 		for(i=0;i<houseNum;i++)
@@ -907,6 +975,26 @@ int main(void)
 							recipeList->list[0]->unlocked = 0;
 							wonderModifier++;
 						}
+						if(movingHouse->type== 4)
+						{
+							specialization = 1;
+							lockTier(3,recipeList);
+						}
+						if(movingHouse->type== 5)
+						{
+							specialization = 2;
+							lockTier(3,recipeList);
+						}
+						if(movingHouse->type== 6)
+						{
+							specialization = 4;
+							lockTier(3,recipeList);
+						}
+						if(movingHouse->type== 9)
+						{
+							specialization = 3;
+							lockTier(3,recipeList);
+						}
 						if(movingHouse->type == 8)
 						{
 							recipeList->list[7]->unlocked = 0;
@@ -944,7 +1032,7 @@ int main(void)
 			
 		}	
 		else if(inMenu != 0)
-		{	
+		{
 			if(inMenu == 1)
 			{
 				setLayer(game,3);
@@ -1059,7 +1147,7 @@ int main(void)
 					inMenu = 0;
 					redrawMenu = 1;
 					houseMove = 1;
-					movingHouse = newHouse(game,0,0,craft);
+					movingHouse = newHouseByName(game,0,0,recipeList->list[craft-1]->name);
 					game->chain->mouse = 2;
 				}
 				
@@ -1109,7 +1197,7 @@ int main(void)
 					for(i=0;i<consumption;i++)
 					{
 						flumfEatActive = 30;
-						flumfEntropy += grabbed->item->value;
+						flumfEntropy += grabbed->item->value*desireMods;
 						deletePileItem(grabbed);
 						pile->total--;
 					}
@@ -1118,7 +1206,7 @@ int main(void)
 					while(flumfEntropy > flumfDesire)
 					{
 						flumfEntropy -= flumfDesire;
-						flumfDesire *= (1.065 - desireMods);
+						flumfDesire *= (1.045);
 						eggSize++;
 						visEggSize++;
 						if(queuedEggs == NULL)
@@ -1137,7 +1225,7 @@ int main(void)
 			{
 				setLayer(game,3);
 				clearLayer(game);
-					if(isClicked(&close->destPos,game,3))
+				if(isClicked(&close->destPos,game,3))
 				{
 					if(game->chain->mouse==1)
 					{
@@ -1147,9 +1235,71 @@ int main(void)
 					}
 					clickable = 1;
 				}
-				drawImage(menuImg,game);
-				grabbed = drawPileDetailSub(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,0,0,0,1,0,&maxscroll, &clickable,&selectionInfo ,selectionMenu);
 				
+				drawBackgroundTile(game,bkgrnd);
+				drawImage(menuImg,game);
+				if(growItem == NULL)
+				{
+					grabbed = drawPileDetailSub(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,0,0,0,1,0,&maxscroll, &clickable,&selectionInfo ,selectionMenu);
+					if(grabbed!=NULL)
+					{
+						grabbed->size--;
+						growItem = grabbed->item;
+						growTimer = 400;
+					}
+				}
+				else
+				{
+					if(clickable == 0)
+					{
+						drawPileDetailSub(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,0,0,0,1,0,&maxscroll, &clickable,&selectionInfo ,selectionMenu);
+						clickable = 0;
+					}
+					else
+					{
+						drawPileDetailSub(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,0,0,0,1,0,&maxscroll, &clickable,&selectionInfo ,selectionMenu);
+					}
+					
+					drawImage(shadowLeftMenu,game);
+					if(growTimer == 0)
+					{
+						moveImageTo(grown,game->boundingBox.w*3/4-grown->w/2,game->boundingBox.h*3/4-grown->h);
+						drawImage(grown,game);
+						moveImageTo(growItem->image,grown->x-growItem->image->w/2+50,grown->y-growItem->image->w/2+10);
+						drawImage(growItem->image,game);
+						moveImageTo(growItem->image,grown->x-growItem->image->w/2+5,grown->y-growItem->image->w/2+75);
+						drawImage(growItem->image,game);
+						moveImageTo(growItem->image,grown->x-growItem->image->w/2+40,grown->y-growItem->image->w/2+100);
+						drawImage(growItem->image,game);
+						tempRect.x= game->boundingBox.w/2;
+						tempRect.w= game->boundingBox.w/2;
+						tempRect.y=0;
+						tempRect.h=game->boundingBox.h;
+						if(isClicked(&tempRect,game,3))
+						{
+							if(game->chain->mouse==1)
+							{
+								putInPile(pile,copyItem(growItem));
+								putInPile(pile,copyItem(growItem));
+								putInPile(pile,growItem);
+								growItem = NULL;
+							}
+							clickable = 1;
+						}
+					}
+					else
+					{
+						growTimer--;
+						moveImageTo(growing,game->boundingBox.w*3/4-growing->w/2,game->boundingBox.h*3/4-growing->h);
+						
+						drawImage(growing,game);
+						moveImageTo(growItem->image,growing->x-growItem->image->w/2,growing->y-growItem->image->h/2);
+						drawImage(growItem->image,game);
+						
+					}
+				}
+				moveImageTo(dirtPile,game->boundingBox.w*3/4-dirtPile->w/2,game->boundingBox.h*3/4-dirtPile->h/2);
+				drawImage(dirtPile,game);
 				
 				drawImage(close,game);
 				setLayer(game,2);
@@ -1183,7 +1333,7 @@ int main(void)
 					}
 					else if(craft==2)
 					{
-						desireMods += .1;	
+						desireMods += .25;	
 					}
 					
 					activatedUpgrades[craft-1] = 1;
@@ -1341,7 +1491,7 @@ int main(void)
 		savefile = fopen("save0.sav","w");
 		fprintf(savefile,"time %ld\n",time(NULL));
 		fprintf(savefile,"eggs %d\n",eggSize);
-		fprintf(savefile,"flumf %lld %lld\n",flumfEntropy,flumfDesire);
+		fprintf(savefile,"flumf %lld %lf\n",flumfEntropy,flumfDesire);
 		fprintf(savefile,"resources %d %d %d %d %d\n",levels[0],levels[1],levels[2],levels[3],levels[4]);
 
 		for(i=0;i<upgradeList->size;i++)
@@ -1354,7 +1504,7 @@ int main(void)
 
 		for(i=0;i<houseNum;i++)
 		{
-			fprintf(savefile,"house %d %d %d %d\n",houseList[i]->type,houseList[i]->size+houseList[i]->pending,houseList[i]->posX,houseList[i]->posY);
+			fprintf(savefile,"house %s %d %d %d\n",houseFromType(houseList[i]->type),houseList[i]->size+houseList[i]->pending,houseList[i]->posX,houseList[i]->posY);
 			for(j=0;j<houseList[i]->size+houseList[i]->pending;j++)
 			{
 				fprintf(savefile, "pal %d %d %d\n",houseList[i]->pals[j]->wonder,houseList[i]->pals[j]->chutzpah,houseList[i]->pals[j]->moxie);

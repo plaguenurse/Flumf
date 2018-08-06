@@ -43,6 +43,7 @@ pencil,images/objects/pencil.png,3,150,10,0,0,5,50,0
 pizza,images/objects/pizza.png,5,550,2950,20,0,0,350,0
 ring,images/objects/ring.png,4,250,150,0,0,150,0,0
 rope,images/objects/rope.png,3,140,30,0,0,0,50,0
+painting,images/objects/painting.png,5,12000,12000,500,0,0,1000,0
 plastic-brick,images/objects/plastic-brick.png,4,20,20,30,0,0,0,0
 rubber-band,images/objects/rubber-band.png,2,85,10,10,0,0,0,0
 santaman,images/objects/santaman.png,2,1500,1000,0,300,0,50,0

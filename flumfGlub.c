@@ -171,7 +171,6 @@ ObjectList* getList(char * fileLocation,Game * game)
 		tempobj->technology = atoi(strtok(NULL,","));
 		objectList->list[tempobj->rarity][objectList->size[tempobj->rarity]] = tempobj;
 		objectList->size[tempobj->rarity]++;
-		fprintf(stderr, " %s, tier %d inserted; list size %d\n",tempobj->name,tempobj->rarity, objectList->size[tempobj->rarity]);
 		i++;
 		
 		fgets(buffer,512,file);
@@ -230,7 +229,7 @@ int drawRecipes(RecipeList * recipeList,Game * game,Font * font,Image * recipeBa
 				
 				if(width+ tempImg->w>game->boundingBox.w*3/4)
 				{
-					height+=130;
+					height+=100;
 					if(width > maxwidth)
 						maxwidth = width;
 					width = 40;
@@ -242,7 +241,6 @@ int drawRecipes(RecipeList * recipeList,Game * game,Font * font,Image * recipeBa
 			
 			if((recipeList->list[i]->levels[0]>0 || recipeList->list[i]->levels[1]>0 || recipeList->list[i]->levels[2]>0 || recipeList->list[i]->levels[3]>0 || recipeList->list[i]->levels[4]>0))
 			{
-				fprintf(stderr,"%s - %d\n",recipeList->list[i]->name,getStatWidth(recipeList->list[i]->levels,tempRect.x,tempRect.y,game,font,tinyResources,350));
 				if(width + getStatWidth(recipeList->list[i]->levels,100000,1000000,game,font,tinyResources,350) > game->boundingBox.w*3/4)
 				{
 					height+=getStatHeight(recipeList->list[i]->levels,tinyResources)+40;
@@ -348,16 +346,17 @@ int drawRecipes(RecipeList * recipeList,Game * game,Font * font,Image * recipeBa
 				tempRect.y+=140;
 				tempRect.x = 20;
 			}
-			else
+			else if((recipeList->list[i]->levels[0]>0 || recipeList->list[i]->levels[1]>0 || recipeList->list[i]->levels[2]>0 || recipeList->list[i]->levels[3]>0 || recipeList->list[i]->levels[4]>0))
 			{
 				tempRect.y+=110-getStatHeight(recipeList->list[i]->levels,tinyResources);
+			
 			}
 			drawStats(recipeList->list[i]->levels,tempRect.x+10,tempRect.y+25,game,font,tinyResources, 350);
 			if(recipeJump)
 			{
 				tempRect.y-=140;
 			}
-			else
+			else if((recipeList->list[i]->levels[0]>0 || recipeList->list[i]->levels[1]>0 || recipeList->list[i]->levels[2]>0 || recipeList->list[i]->levels[3]>0 || recipeList->list[i]->levels[4]>0))
 			{
 				tempRect.y-=110-getStatHeight(recipeList->list[i]->levels,tinyResources);
 			}
@@ -414,16 +413,15 @@ int drawRecipes(RecipeList * recipeList,Game * game,Font * font,Image * recipeBa
 			else
 			{
 				bgRect.y = tempRect.y;
-				bgRect.w = (width/50)*50;
+				bgRect.w = (maxwidth/50+1)*50;
 				bgRect.x =0;
-				bgRect.h = (height/50)*50;
+				bgRect.h = (height/50+1)*50;
 				if(isClicked(&bgRect,game,game->currLayer))
 				{
 					if(game->chain->mouse == 1)
 					{
 						retval = i+1;
 						game->chain->mouse = 2;
-						fprintf(stderr,"%s clicked\n",recipeList->list[i]->name);
 					}
 					*clickable = 1;
 					
@@ -480,6 +478,18 @@ void unlockTier(int tier, RecipeList * list)
 	}
 }
 
+void lockTier(int tier, RecipeList * list)
+{
+	int i;
+	for(i=0;i<list->size;i++)
+	{
+		if(list->list[i]->type == tier)
+		{
+			list->list[i]->unlocked = 0;
+		}
+	}
+}
+
 RecipeList* getRecipeList(char * fileLocation, Game * game)
 {
 	RecipeList* recipeList;
@@ -494,7 +504,6 @@ RecipeList* getRecipeList(char * fileLocation, Game * game)
 		fgets(buffer,512,file);
 		listSize++;
 	}
-	fprintf(stderr,"List size:%d\n",listSize);
 	rewind(file);
 	recipeList = malloc(sizeof(RecipeList));
 	recipeList->list = malloc(sizeof(Recipe*)*listSize);
@@ -506,9 +515,7 @@ RecipeList* getRecipeList(char * fileLocation, Game * game)
 		temp = strtok(buffer,",");
 		recipeList->list[i]->name = malloc(sizeof(char)*(strlen(temp)+1));
 		strcpy(recipeList->list[i]->name,temp);
-		fprintf(stderr,"Grabbing stuff for:%s\n",recipeList->list[i]->name);
 		temp = strtok(NULL,",");
-		fprintf(stderr,"Loading %s\n",temp);
 		recipeList->list[i]->image = loadImage(temp,3,1,game);
 		recipeList->list[i]->type = atoi(strtok(NULL,","));
 		recipeList->list[i]->nameList = NULL;
@@ -523,7 +530,6 @@ RecipeList* getRecipeList(char * fileLocation, Game * game)
 		j = 0;
 		while(temp != NULL)
 		{
-			fprintf(stderr,"Loading %s\n",temp);
 			if(strcmp("%levels",temp)==0)
 			{
 				recipeList->list[i]->levels[0]=atoi(strtok(NULL,","));
@@ -692,7 +698,6 @@ void giveAdventurerNewItem(Adventurer * pal, Object * item)
 void giveAdventurerItem(Adventurer * pal, Item * item)
 {
 	pal->item = item;
-	fprintf(stderr,"Grab item %s\n",item->name);
 	moveImageTo(item->image,pal->image->x,pal->image->y - item->image->h);
 	
 }
@@ -946,7 +951,7 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 	House * house = malloc(sizeof(House));
 	house->posX = x;
 	house->posY = y;
-	if(strcmp(name,"forge")==0)
+	if(strcmp(name,"Forge")==0)
 	{
 		house->image = loadImage("images/buildings/forge.png",3,1,game);
 		house->capacity = 0;
@@ -954,7 +959,7 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->pals = NULL;
 		house->type = 1;
 	}
-	else if(strcmp(name,"shack")==0)
+	else if(strcmp(name,"Shack")==0)
 	{
 		house->image = loadImage("images/buildings/shack.png",3,1,game);
 		house->capacity = 50;
@@ -962,7 +967,7 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->pals = malloc(sizeof(Adventurer)*house->capacity);
 		house->type = 2;
 	}
-	else if(strcmp(name,"house")==0)
+	else if(strcmp(name,"House")==0)
 	{
 		house->image = loadImage("images/buildings/house.png",3,1,game);
 		house->capacity = 150;
@@ -970,7 +975,7 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->pals = malloc(sizeof(Adventurer)*house->capacity);
 		house->type = 3;
 	}
-	else if(strcmp(name,"gumball")==0)
+	else if(strcmp(name,"Gumball_Machine")==0)
 	{
 		house->image = loadImage("images/buildings/gumball.png",3,1,game);
 		house->capacity = 0;
@@ -978,7 +983,7 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->pals = NULL;
 		house->type = 4;
 	}
-	else if(strcmp(name,"clothes")==0)
+	else if(strcmp(name,"Clothing_Station")==0)
 	{
 		house->image = loadImage("images/buildings/clothes.png",3,1,game);
 		house->capacity = 0;
@@ -986,7 +991,7 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->pals = NULL;
 		house->type = 5;
 	}
-	else if(strcmp(name,"farm")==0)
+	else if(strcmp(name,"Farm")==0)
 	{
 		house->image = loadImage("images/buildings/farm.png",3,1,game);
 		house->capacity = 0;
@@ -994,7 +999,7 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->pals = NULL;
 		house->type = 6;
 	}
-	else if(strcmp(name,"oven")==0)
+	else if(strcmp(name,"Oven")==0)
 	{
 		house->image = loadImage("images/buildings/oven.png",3,1,game);
 		house->capacity = 0;
@@ -1002,7 +1007,7 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->pals = NULL;
 		house->type = 7;
 	}
-	else if(strcmp(name,"upgrade")==0)
+	else if(strcmp(name,"Upgrade")==0)
 	{
 		house->image = loadImage("images/buildings/upgrade.png",3,1,game);
 		house->capacity = 0;
@@ -1010,7 +1015,7 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->pals = NULL;
 		house->type = 8;
 	}
-	else if(strcmp(name,"mine")==0)
+	else if(strcmp(name,"Mine")==0)
 	{
 		house->image = loadImage("images/buildings/mine.png",3,1,game);
 		house->capacity = 0;
@@ -1019,7 +1024,6 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->type = 9;
 	}
 	moveImageTo(house->image,x,y);
-	
 	house->status = 0;
 	house->pending = 0;
 	return house;
@@ -1099,6 +1103,51 @@ House * newHouse(Game * game, int x, int y, int type)
 	house->pending = 0;
 	return house;
 }
+
+char * houseFromType(int type)
+{
+	if(type == 1)
+	{
+		return "Forge";
+	}
+	else if(type == 2)
+	{
+		
+		return "Shack";
+	}
+	else if(type == 3)
+	{
+		return "House";
+		
+	}
+	else if(type == 4)
+	{
+		return "Gumball_Machine";
+	}
+	else if(type == 5)
+	{
+		return "Clothing_Station";
+	}
+	else if(type == 6)
+	{
+		return "Farm";
+	}
+	else if(type == 7)
+	{
+		return "Oven";
+	}
+	else if(type == 8)
+	{
+		return "Upgrade";
+	}
+	else if(type == 9)
+	{
+		return "Mine";
+		
+	}
+	return NULL;
+}
+
 
 void addPaltoHouse(House * house, Adventurer * pal, Game * game)
 {
@@ -1559,10 +1608,6 @@ void deleteItemsRecipe(Recipe * recipe, Pile * pile)
 
 void deletePileItem(PileItem * item)
 {
-	if(item->size<=0)
-	{
-		fprintf(stderr,"Something went wrong when deleting item\n");
-	}
 	item->size--;
 	
 }
@@ -1670,7 +1715,25 @@ PileItem * drawPileDetailSub(Pile * pile, Game * game, Font * font, int * offset
 	return retval;
 }
 
-
+void drawBackgroundTile(Game * game, Image * tile)
+{
+	int i = 0, j = 0;
+	SDL_Rect temprect;
+	temprect.x = 0;
+	temprect.y = 0;
+	temprect.w = tile->w;
+	temprect.h = tile->h;
+	for(i=0;i<game->boundingBox.w;i+= tile->w)
+	{
+		for(j=0;j<game->boundingBox.h;j+= tile->h)
+		{
+			SDL_RenderCopy(game->renderer,tile->image,&tile->srcPos,&temprect);
+			temprect.y+=tile->h;
+		}
+		temprect.x+=tile->w;
+		temprect.y=0;
+	}	
+}
 
 void drawFeedBackground(Game * game, Image * bkgrnd, Image * flumf, Image * menuleft, int anim)
 {
@@ -1894,7 +1957,6 @@ void removeFromQueue(ProductionQueue * queue,int i)
 		queue->queue[j] = queue->queue[j+1];
 	}
 	queue->size--;
-	fprintf(stderr,"Removing from queue\n");
 	queue->queue = realloc(queue->queue,sizeof(PQueue *)*queue->size);
 }
 
@@ -2069,8 +2131,8 @@ void drawLevels(int* levels, Image * levelBar, Game * game, Image * background, 
 			drawLevels[i] = levels[i]*6/max;
 		setToFrame(levelBar,i,1);
 		setToFrame(bottomInfo,i,0);
-		moveImageTo(bottomInfo,265+(levelBar->w+step)*i,game->boundingBox.h-36-bottomInfo->h);
-		moveImageTo(levelBar,265+(levelBar->w+step)*i,game->boundingBox.h-36-bottomInfo->h-levelBar->h);
+		moveImageTo(bottomInfo,265+(levelBar->w+step)*i,game->boundingBox.h-46-bottomInfo->h);
+		moveImageTo(levelBar,265+(levelBar->w+step)*i,game->boundingBox.h-46-bottomInfo->h-levelBar->h);
 		for(j=0;j<drawLevels[i];j++)
 		{
 			drawImage(levelBar,game);
@@ -2322,7 +2384,6 @@ UpgradeList* getUpgradeList(char * fileLocation, Game * game)
 		fgets(buffer,1024,file);
 		listSize++;
 	}
-	fprintf(stderr,"List size:%d\n",listSize);
 	rewind(file);
 	upgradeList = malloc(sizeof(UpgradeList));
 	upgradeList->list = malloc(sizeof(Upgrade*)*listSize);
@@ -2334,9 +2395,7 @@ UpgradeList* getUpgradeList(char * fileLocation, Game * game)
 		temp = strtok(buffer,",");
 		upgradeList->list[i]->name = malloc(sizeof(char)*(strlen(temp)+1));
 		strcpy(upgradeList->list[i]->name,temp);
-		fprintf(stderr,"Grabbing stuff for:%s\n",upgradeList->list[i]->name);
 		temp = strtok(NULL,",");
-		fprintf(stderr,"Loading %s\n",temp);
 		
 		upgradeList->list[i]->desc = malloc(sizeof(char)*(strlen(temp)+1));
 		strcpy(upgradeList->list[i]->desc,temp);
@@ -2353,7 +2412,6 @@ UpgradeList* getUpgradeList(char * fileLocation, Game * game)
 		j = 0;
 		while(temp != NULL)
 		{
-			fprintf(stderr,"Loading %s\n",temp);
 			if(strcmp("%levels",temp)==0)
 			{
 				upgradeList->list[i]->levels[0]=atoi(strtok(NULL,","));
@@ -2688,7 +2746,6 @@ int drawUpgrades(UpgradeList * upgradeList,Game * game,Font * font,Image * upgra
 					{
 						retval = i+1;
 						game->chain->mouse = 2;
-						fprintf(stderr,"%s clicked\n",upgradeList->list[i]->name);
 					}
 					*clickable = 1;
 					
@@ -2870,5 +2927,18 @@ void sortList(ObjectList * objectList)
 			size--;
 		}
 		while(changed);
+	}
+}
+
+
+void unlockHouse(RecipeList * recipeList,char * name, char unlock)
+{
+	int i;
+	for(i=0;i<recipeList->size;i++)
+	{
+		if(strcmp(recipeList->list[i]->name,name)==0)
+		{
+			recipeList->list[i]->unlocked = unlock;
+		}
 	}
 }

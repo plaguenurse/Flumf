@@ -254,6 +254,7 @@ void removeItemFromQueue(PQueue * queue,int i);
 char usefulstrcmp(char* input, char * match);
 Clothing * dupeClothing(Clothing * clothes);
 void unlockTier(int tier, RecipeList * list);
+void lockTier(int tier, RecipeList * list);
 void drawLevels(int* levels, Image * levelBar, Game * game, Image * background, Image* bottomInfo, Font * font);
 int drawStatsItem(Item * item,int x, int y,Game * game,Font * font,Image* tinyResources, int maxWidth);
 int drawStats(int * levels,int x, int y,Game * game,Font * font,Image* tinyResources, int maxWidth);
@@ -296,9 +297,12 @@ void addClothingToQueue(ProductionQueue * queue, Clothing ** clothes,Recipe * re
 void itemSave(Pile * pile, FILE * savefile);
 int canRemove(House ** houseList, int houseNum,House * movingHouse);
 int getStatHeight(int * levels, Image * tinyResources);
+char * houseFromType(int type);
+void drawBackgroundTile(Game * game, Image * tile);
+void unlockHouse(RecipeList * recipeList,char * name, char unlock);
 //needs work
 
 //to-do
-void unlockHouse(RecipeList * recipeList,int i, char unlock);
+
 
 #endif
