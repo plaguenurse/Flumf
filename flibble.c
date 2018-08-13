@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h> 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -24,6 +25,7 @@ void endGame(Game * game)
 	SDL_DestroyRenderer(game->renderer);
 	SDL_DestroyWindow(game->window);
 	free(game);
+	Mix_Quit();
 	SDL_Quit();
 }
 
@@ -93,6 +95,13 @@ Game * setup(int width,int height)
 	game->layerList[0] = newLayer(game,width,height);
 
 	SDL_RenderSetViewport(game->renderer,&game->boundingBox);
+
+	if((MIX_INIT_MP3&Mix_Init(MIX_INIT_MP3)) != MIX_INIT_MP3)
+	{
+		fprintf(stderr,"%s\n",Mix_GetError());
+	}
+	if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 ) 
+		fprintf(stderr,"%s\n",Mix_GetError());
 
 	setLayer(game,0);
 	clearLayer(game);

@@ -1,431 +1,89 @@
-time 1533521342
+time 1534126557
 eggs 0
-flumf 458 1306.036585
-resources 840 2150 1685 1060 3500
-upgrade 2
-house House 150 2460 521
-pal 10 532 30
-pal 10 537 20
-pal 10 841 10
-pal 10 782 20
-pal 10 532 10
-pal 20 702 30
-pal 10 722 10
-pal 10 732 10
-pal 10 852 10
-pal 10 652 20
-pal 1 94 3
-pal 1 68 2
-pal 1 78 3
-pal 1 86 3
-pal 1 88 1
-pal 1 58 1
-pal 1 73 1
-pal 1 83 3
-pal 1 87 2
-pal 1 86 1
-pal 1 75 2
-pal 1 58 1
-pal 1 90 1
-pal 1 68 1
-pal 1 83 3
-pal 1 71 2
-pal 1 68 3
-pal 1 72 1
-pal 1 76 3
-pal 1 76 2
-pal 1 83 1
-pal 1 58 1
-pal 1 84 1
-pal 1 70 3
-pal 1 64 3
-pal 1 62 3
+flumf 8 138.298737
+resources 380 750 55 50 200
+house House 6 2294 521
+pal 30 8065 1
 pal 1 73 2
-pal 1 74 3
-pal 1 82 2
-pal 1 85 2
-pal 1 71 3
-pal 1 87 2
-pal 1 58 1
-pal 2 78 3
-pal 1 76 2
-pal 1 76 3
-pal 1 86 1
-pal 1 69 1
-pal 1 86 2
-pal 1 63 3
-pal 1 65 3
-pal 1 61 2
-pal 1 70 3
-pal 1 75 1
-pal 1 78 2
-pal 1 72 1
-pal 1 84 3
-pal 1 68 1
-pal 1 62 3
-pal 1 58 2
-pal 1 62 1
-pal 1 60 2
-pal 1 69 2
-pal 1 77 2
-pal 1 92 3
-pal 1 80 2
-pal 1 57 1
-pal 1 89 1
-pal 1 72 3
-pal 1 67 3
-pal 1 83 1
-pal 1 73 2
-pal 1 82 3
-pal 1 62 3
-pal 1 70 1
-pal 2 87 1
-pal 1 66 1
-pal 2 68 1
-pal 2 91 3
-pal 1 78 1
-pal 1 90 2
-pal 1 84 2
-pal 1 56 1
-pal 1 77 2
-pal 1 82 2
-pal 1 65 2
-pal 1 80 2
-pal 1 70 1
-pal 1 76 1
+pal 1 55 3
 pal 1 81 1
-pal 1 87 2
-pal 1 57 1
-pal 1 75 1
-pal 1 58 1
-pal 1 81 3
-pal 1 67 1
-pal 1 61 2
-pal 1 58 2
-pal 2 86 3
-pal 1 60 3
-pal 1 60 3
-pal 1 69 2
-pal 1 57 2
-pal 1 83 2
-pal 1 75 2
-pal 1 82 1
-pal 1 62 3
-pal 1 60 3
-pal 2 88 2
-pal 1 87 3
-pal 1 61 2
-pal 1 58 1
-pal 1 63 1
-pal 1 81 3
-pal 1 74 2
-pal 1 80 2
-pal 1 66 3
-pal 1 58 1
-pal 1 68 2
-pal 1 68 1
-pal 2 85 2
-pal 1 80 1
-pal 1 58 1
-pal 2 68 3
-pal 1 65 1
-pal 1 59 1
-pal 1 85 2
-pal 1 64 1
-pal 1 60 3
-pal 1 66 1
-pal 1 68 2
+pal 1 78 1
+pal 1 60 1
+house Shack 31 2202 521
+pal 1 53 2
+pal 1 64 2
+pal 1 55 3
+pal 1 63 3
+pal 1 79 1
 pal 1 81 2
-pal 1 74 3
-pal 1 80 1
-pal 1 62 3
-pal 1 83 3
-pal 1 75 1
-pal 1 67 1
-pal 1 60 2
-pal 1 85 1
-pal 1 87 2
-pal 1 61 1
-pal 1 67 1
-pal 1 63 2
-pal 1 82 1
-pal 1 54 3
-pal 1 85 2
-pal 1 70 1
-pal 1 71 2
-pal 1 56 3
-house Forge 0 2123 521
-house Shack 13 2359 521
-pal 2 71 1
-pal 1 74 1
-pal 1 70 3
-pal 1 83 3
-pal 1 80 2
-pal 1 56 1
+pal 1 59 1
+pal 1 58 2
+pal 1 55 2
 pal 1 83 2
-pal 1 76 3
-pal 1 52 3
-pal 1 65 3
-pal 1 56 2
-pal 1 82 1
-pal 1 50 1
-house House 7 2455 432
+pal 1 58 2
 pal 1 58 1
-pal 1 73 1
+pal 1 63 2
+pal 1 65 3
+pal 1 76 3
 pal 1 79 3
-pal 1 62 3
-pal 2 80 2
-pal 1 66 2
-pal 1 61 1
-house House 3 2393 432
-pal 1 84 1
-pal 2 61 1
-pal 1 72 2
-house Upgrade 0 2438 343
-house Farm 0 2244 521
-item bottle-cap
-item bottle-cap
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
-item bow
+pal 1 82 2
+pal 1 63 3
+pal 1 74 2
+pal 1 67 3
+pal 1 66 3
+pal 1 60 2
+pal 1 74 2
+pal 1 83 1
+pal 1 65 1
+pal 1 52 2
+pal 1 68 3
+pal 1 76 1
+pal 2 80 3
+pal 1 69 2
+pal 1 76 2
+house Shack 13 2190 343
+pal 2 59 1
+pal 1 65 2
+pal 1 54 1
+pal 1 84 3
+pal 1 75 1
+pal 1 75 1
+pal 1 86 1
+pal 1 60 3
+pal 1 67 1
+pal 1 72 3
+pal 1 54 1
+pal 1 75 1
+pal 1 81 2
+house Shack 0 2260 343
+house Forge 0 2224 432
 item bow
 item bread
-item bread
-item bread
-item button
-item button
-item button
-item button
-item button
-item button
-item button
-item coin
-item crayon
-item crayon
 item crayon
 item cup
 item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item cup
-item dice
-item dice
-item dice
-item dice
-item eraser
-item eraser
-item eraser
-item eraser
-item fork
-item gear
-item holiday-light
-item holiday-light
-item holiday-light
 item ipod
-item ipod
-item ipod
-item iron
 item jar
-item jar
-item jar
-item jar
-item key
-item key
-item key
 item lighter
 item lighter
 item lighter
 item lighter
 item lighter
-item lighter
-item lighter
-item lighter
-item lighter
-item lighter
-item lighter
-item lighter
-item lighter
-item lighter
-item lighter
-item loaf
-item loaf
-item loaf
-item loaf
 item nail
 item nail
 item nail
 item nail
 item nail
 item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item nail
-item needle
-item needle
-item needle
-item paper-swan
-item paper-swan
-item paper-swan
 item paperclip
 item paperclip
-item paperclip
-item paperclip
-item paperclip
-item pencil
-item pencil
-item pencil
-item ring
-item rope
-item rope
-item rope
 item rubber-band
 item rubber-band
-item santaman
 item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item scissors
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
-item screwdriver
 item screwdriver
 item sock
-item sock
-item sock
-item sock
-item sock
-item soda
-item soda
-item soda
-item spool
-item spool
-item spool
 item spool
 item strawberry
-item strawberry
-item strawberry
-item strawberry
-item strawberry
-item strawberry
-item strawberry
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
-item tack
 item tack
 item tack
 item tack
@@ -440,52 +98,9 @@ item tape
 item tape
 item tape
 item tape
-item tape
-item tape
-item tape
-item tape
-item tape
-item tape
-item tape
-item tape
-item tape
-item tape
-item tape
-item tape
-item thermometer
 item tin-can
 item tin-can
 item tin-can
 item tin-can
 item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item tin-can
-item toy-car
-item umbrella
-item usb-drive
-item usb-drive
-item walkie-talkie
-item walkie-talkie
-item walkie-talkie
-item walkie-talkie
-item whistle
-item whistle
 item whistle

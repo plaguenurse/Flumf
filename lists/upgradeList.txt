@@ -1,2 +1,4 @@
-Cybernetic Legs,Give your pals some cool robo-legs to run faster,1,needle,2,%levels,0,0,2000,0,0
-HungryFlumf goodmeal,Increase the cravings level of your glorious flumf,1,loaf,1,bread,1,tin-can,1,%levels,0,0,0,1000,0
+Cybernetic Legs,Give your pals some cool robo-legs to run faster,1,needle,2,%levels,0,0,1000,0,1000
+HungryFlumf goodmeal,Increase the cravings level of your glorious Flumf,1,loaf,1,bread,1,tin-can,1,%levels,0,0,0,1000,0
+Automagic Whistle,Have some of your pals wander around collecting while you relax,1,bell,1,whistle,2,egg,1,%levels,0,0,0,1000,1000
+Cybernetic Arms,Give your pals some cool robo-arms to lift more,1,needle,2,%levels,0,0,1000,0,1000

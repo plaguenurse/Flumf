@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -673,6 +674,8 @@ Adventurer * newAdventurer(int type, Game * game)
 	pal->delay = 0;
 	pal->negpos = 0;
 	pal->posTo = 0;
+	pal->posToX = 0;
+	pal->posToY = 0;
 	
 	pal->moxie = rand()%3 + 1;
 	pal->burdenedmoxie = pal->moxie;
@@ -837,15 +840,31 @@ void moveAdventurer(Adventurer * pal, int x, int y)
 	}
 }
 
-void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs, int moxieBonus, int scrollmin)
+void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs, int moxieBonus, int scrollmin, House ** houseList, int houseNum)
 {
+	int ambulation = 0;
 	if(pal->type ==1)
 	{
+		
 		if (pal->status == 1  && pal->image->x >= -pal->image->w*4)
 		{
 			if(pal->delay == 0)
 			{
-				moveAdventurer(pal,-getMoxie(pal,moxieBonus),0);
+				ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
+				if(ambulation !=0)
+				{
+					if(ambulation == 2)
+					{
+						moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+					}
+					else
+					{
+						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					}
+					drawAdventurer(pal,game);
+				}
+				else
+					moveAdventurer(pal,-getMoxie(pal,moxieBonus),0);
 				drawAdventurer(pal,game);
 			}
 			else
@@ -855,14 +874,42 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 		}
 		else if (pal->status == 2)
 		{
-			moveAdventurer(pal,pal->burdenedmoxie,0);
+			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
+
+			if(ambulation !=0)
+			{
+				if(ambulation == 2)
+				{
+					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+				}
+				drawAdventurer(pal,game);
+			}
+			else
+				moveAdventurer(pal,pal->burdenedmoxie,0);
 			drawAdventurer(pal,game);
 		}
 		else if (pal->status == 3)
 		{
+			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,0);
 			if(pal->item != NULL)
 				pal->item = NULL;
-			if(abs(pal->image->x-x)<getMoxie(pal,moxieBonus))
+			if(ambulation !=0)
+			{
+				if(ambulation == 2)
+				{
+					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+				}
+				drawAdventurer(pal,game);
+			}
+			else if(abs(pal->image->x-x)<getMoxie(pal,moxieBonus))
 			{
 				pal->status = 0;
 				(*currOutPals)--;
@@ -875,8 +922,23 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 		}
 		else if (pal->status == 4)
 		{
-			if(pal->delay == 0)
+			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
+
+			if(ambulation !=0)
 			{
+				if(ambulation == 2)
+				{
+					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+				}
+				drawAdventurer(pal,game);
+			}
+			else if(pal->delay == 0)
+			{
+				
 				moveAdventurer(pal,getMoxie(pal,moxieBonus),0);
 				drawAdventurer(pal,game);
 			}
@@ -892,7 +954,21 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 		{
 			if(pal->item!=NULL)
 			{
-				if(abs(pal->image->x-pal->posTo)<getMoxie(pal,moxieBonus))
+				ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
+
+				if(ambulation !=0)
+				{
+					if(ambulation == 2)
+					{
+						moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+					}
+					else
+					{
+						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					}
+					drawAdventurer(pal,game);
+				}
+				else if(abs(pal->image->x-pal->posTo)<getMoxie(pal,moxieBonus))
 				{
 					pal->status = 6;
 				}
@@ -905,7 +981,21 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 		}
 		else if (pal->status == 6)
 		{
-			if(abs(pal->image->x-x)<getMoxie(pal,moxieBonus))
+			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
+
+			if(ambulation !=0)
+			{
+				if(ambulation == 2)
+				{
+					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+				}
+				drawAdventurer(pal,game);
+			}
+			else if(abs(pal->image->x-x)<getMoxie(pal,moxieBonus))
 			{
 				pal->status = 0;
 				(*currOutPals)--;
@@ -920,8 +1010,25 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 		{
 			if(pal->delay == 0)
 			{
-				moveAdventurer(pal,getMoxie(pal,moxieBonus),0);
-				drawAdventurer(pal,game);
+				ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
+
+				if(ambulation !=0)
+				{
+					if(ambulation == 2)
+					{
+						moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+					}
+					else
+					{
+						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					}
+					drawAdventurer(pal,game);
+				}
+				else 
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus),0);
+					drawAdventurer(pal,game);
+				}
 			}
 			else
 			{
@@ -936,11 +1043,55 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 		}
 		else if(pal->status==8)
 		{
-			moveAdventurer(pal,(pal->image->x>x)?-getMoxie(pal,moxieBonus):getMoxie(pal,moxieBonus),0);
-			drawAdventurer(pal,game);
-			if(abs(pal->image->x-x)<getMoxie(pal,moxieBonus))
+			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
+
+			if(ambulation !=0)
 			{
-				pal->status = 9;
+				if(ambulation == 2)
+				{
+					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+				}
+				drawAdventurer(pal,game);
+			}
+			else 
+			{
+				moveAdventurer(pal,(pal->image->x>x)?-getMoxie(pal,moxieBonus):getMoxie(pal,moxieBonus),0);
+				drawAdventurer(pal,game);
+				if(abs(pal->image->x-x)<getMoxie(pal,moxieBonus))
+				{
+					pal->status = 9;
+				}
+			}
+		}
+		else if(pal->status==10)
+		{
+			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
+
+			if(ambulation !=0)
+			{
+				if(ambulation == 2)
+				{
+					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+				}
+				drawAdventurer(pal,game);
+			}
+			else 
+			{
+				moveAdventurer(pal,(pal->image->x>pal->posToX)?-getMoxie(pal,moxieBonus):getMoxie(pal,moxieBonus),0);
+				drawAdventurer(pal,game);
+				if(abs(pal->image->x-pal->posToX)<getMoxie(pal,moxieBonus))
+				{
+					pal->status = 11;
+					pal->burdenedmoxie = getMoxie(pal,moxieBonus);
+				}
 			}
 		}
 	}
@@ -1157,7 +1308,9 @@ void addPaltoHouse(House * house, Adventurer * pal, Game * game)
 	house->pals[house->size] = pal;
 	house->size++;
 	moveImageTo(pal->image,house->image->x + house->image->w/2 - pal->image->x/2, pal->image->y);
-	moveImageTo(pal->image,pal->image->x,game->boundingBox.h - 30 - pal->image->h);
+	moveImageTo(pal->image,pal->image->x,house->image->y+house->image->h-pal->image->h);
+	pal->posToX = house->image->x;
+	pal->posToY = house->image->y;
 }
 
 
@@ -1615,7 +1768,7 @@ void deletePileItem(PileItem * item)
 
 
 
-PileItem * drawPileDetailSub(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image * tinyResources,char plastic,char fabric,char metal,char nature, char tech,int * scrollMax, int* clickable, int * selection,Image *selectionMenu)
+PileItem * drawPileDetailSub(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image * tinyResources,char plastic,char fabric,char metal,char nature, char tech,int * scrollMax, int* clickable, int * selection,Image *selectionMenu,Image * ordering)
 {
 	PileItem * curr = NULL, *retval = NULL;
 	int  i = 0,scrollhold, tempX,doubletemp;
@@ -1628,8 +1781,10 @@ PileItem * drawPileDetailSub(Pile * pile, Game * game, Font * font, int * offset
 	rect.w = 0;
 	rect.h = 0;
 	
-	
-	curr= pile->firstSize;
+	if((*selection&4)==4)
+		curr= pile->firstAlpha;
+	else
+		curr= pile->firstSize;
 	while(curr!=NULL)
 	{
 		if(curr->size>0 && (curr->item->plastic>0)==plastic && (curr->item->fabric>0)==fabric && (curr->item->metal>0)==metal && (curr->item->nature>0)==nature && (curr->item->technology>0)==tech)
@@ -1674,21 +1829,22 @@ PileItem * drawPileDetailSub(Pile * pile, Game * game, Font * font, int * offset
 				}
 				*clickable = 1;
 			}
+			
 			rect.w-=4*curr->size;
 			rect.x+=4*curr->size;
 			
 			rect.y += curr->item->image->h+5;
-			*scrollMax = *offsety-rect.y+game->boundingBox.h-20;
-			if(rect.y > game->boundingBox.h-20)
-			{
-				*canScroll += 2;
-			}
+			
 		}
+	
+		rect.x = 30;
 		//selector for type
 		{
-			curr = curr->nextSize;
+			if((*selection&4)==4)
+				curr= curr->nextAlpha;
+			else
+				curr= curr->nextSize;
 		}
-		
 	}
 	*scrollMax = *offsety-rect.y +game->boundingBox.h-20;
 	if(rect.y > *offsety + game->boundingBox.h-20)
@@ -1696,9 +1852,25 @@ PileItem * drawPileDetailSub(Pile * pile, Game * game, Font * font, int * offset
 		*canScroll += 2;
 	}
 	
+	for(i=0;i<2;i++)
+	{
+		moveImageTo(ordering,game->boundingBox.w/2-7-2*ordering->w+i*ordering->w,game->boundingBox.h-ordering->h);
+		setToFrame(ordering,i,((*selection&4)==(i*4)));
+		drawImage(ordering,game);
+		if(isClicked(&ordering->destPos,game,game->currLayer))
+		{
+			if(game->chain->mouse == 1 )
+			{
+				game->chain->mouse = 2;
+				*offsety = 0;
+				*selection = (*selection & ~4)+(i)*4;
+			}
+			*clickable = 1;
+		}
+	}
 	for(i=0;i<3;i++)
 	{
-		moveImageTo(selectionMenu,game->boundingBox.w/2+(i-2)*selectionMenu->w,game->boundingBox.h-selectionMenu->h);
+		moveImageTo(selectionMenu,game->boundingBox.w/2+7+i*selectionMenu->w,game->boundingBox.h-selectionMenu->h);
 		setToFrame(selectionMenu,i,((*selection&3)==(i+1)));
 		drawImage(selectionMenu,game);
 		if(isClicked(&selectionMenu->destPos,game,game->currLayer))
@@ -1711,6 +1883,7 @@ PileItem * drawPileDetailSub(Pile * pile, Game * game, Font * font, int * offset
 			*clickable = 1;
 		}
 	}
+	
 	
 	return retval;
 }
@@ -1971,7 +2144,7 @@ void removeItemFromQueue(PQueue * queue,int i)
 	queue->itemsize--;
 }
 
-void removeNextItemQueue(ProductionQueue * queue,Item * item)
+int removeNextItemQueue(ProductionQueue * queue,Item * item)
 {
 	int i,j;
 	for(i = 0;i<queue->size;i++)
@@ -1981,10 +2154,11 @@ void removeNextItemQueue(ProductionQueue * queue,Item * item)
 			if(queue->queue[i]->items[j] == item)
 			{
 				removeItemFromQueue(queue->queue[i],j);
-				return;
+				return i;
 			}
 		}
 	}
+	return -1;
 }
 
 House ** checkQueueHouse(ProductionQueue * queue, House ** houseList, int * houseNum)
@@ -2312,8 +2486,8 @@ Enemy * newEnemy(int type, Game * game)
 	foe->negpos = 0;
 	foe->posTo = 0;
 	
-	foe->speed = rand()%5 + 2;
-	foe->health = (rand()%3)*10 + 10;
+	foe->speed = 1;
+	foe->health = (rand()%3)*10 + 30;
 	foe->image = loadImage("images/enemies/1.png",7,2,game);	
 	foe->status = 0;
 	
@@ -2505,7 +2679,7 @@ int canUpgradeCraft(Upgrade * upgrade, Pile * pile, ObjectList * list, int*level
 
 int drawUpgrades(UpgradeList * upgradeList,Game * game,Font * font,Image * upgradeBackground,Image * upgradeBlack,ObjectList * items, Pile * pile, int * scrolly, int * canScroll, Image * tinyResources, int * levels, int * scrollmax, int* clickable)
 {
-	int i = 0, j = 0, k =0,width,height, doubletemp,retval = 0;
+	int i = 0, j = 0, k =0,width,height, doubletemp,retval = 0, maxwidth;
 	int active = 0, upgradeJump = 0;
 	char numText[16] = "x0";
 	SDL_Rect tempRect,bgRect;
@@ -2527,36 +2701,44 @@ int drawUpgrades(UpgradeList * upgradeList,Game * game,Font * font,Image * upgra
 			bgRect.w = upgradeBackground->w;
 			bgRect.h = upgradeBackground->h;
 			width=190;
+			maxwidth=190;
 			height = 180;
 			for(j=0;j<upgradeList->list[i]->size;j++)
 			{
 				tempImg = getImageByName(upgradeList->list[i]->nameList[j],items);
-				width +=tempImg->w+20;
-				if(width+ tempImg->w>game->boundingBox.w)
+				
+				if(width+tempImg->w>game->boundingBox.w*3/4)
 				{
-					height+=tempImg->h+20;
-					width = game->boundingBox.w;
+					height+=100;
+					if(width > maxwidth)
+						maxwidth = width;
+					width = 40;
 				}
+				width +=tempImg->w+20;
 			}
+			if(width > maxwidth)
+						maxwidth = width;
 			
 			if((upgradeList->list[i]->levels[0]>0 || upgradeList->list[i]->levels[1]>0 || upgradeList->list[i]->levels[2]>0 || upgradeList->list[i]->levels[3]>0 || upgradeList->list[i]->levels[4]>0))
 			{
-				
-				if(width + getStatWidth(upgradeList->list[i]->levels,tempRect.x,tempRect.y,game,font,tinyResources,350) > game->boundingBox.w)
+				if(width + getStatWidth(upgradeList->list[i]->levels,100000,1000000,game,font,tinyResources,350) > game->boundingBox.w*3/4)
 				{
 					height+=getStatHeight(upgradeList->list[i]->levels,tinyResources)+40;
 					upgradeJump=1;
-					if(getStatWidth(upgradeList->list[i]->levels,tempRect.x,tempRect.y,game,font,tinyResources,350)>width)
-						width = getStatWidth(upgradeList->list[i]->levels,tempRect.x,tempRect.y,game,font,tinyResources,350)+50;
+					width = 40+getStatWidth(upgradeList->list[i]->levels,tempRect.x,tempRect.y,game,font,tinyResources,350);
+					if(width > maxwidth)
+						maxwidth = width;
 				}
 				else 
 				{
 					width+= getStatWidth(upgradeList->list[i]->levels,tempRect.x,tempRect.y,game,font,tinyResources,350);
+					if(width > maxwidth)
+						maxwidth = width;
 				}
 			}
 			bgRect.y = tempRect.y;
 			bgRect.x = 0;
-			for(j=0;j<((width>game->boundingBox.w)?game->boundingBox.w-60:width+60);j+=upgradeBackground->w)
+			for(j=0;j<maxwidth;j+=upgradeBackground->w)
 			{
 				if(j==0)
 					setToFrame(upgradeBackground,0,0);
@@ -2602,98 +2784,71 @@ int drawUpgrades(UpgradeList * upgradeList,Game * game,Font * font,Image * upgra
 			SDL_RenderCopy(game->renderer,upgradeBackground->image,&upgradeBackground->srcPos,&bgRect);
 			bgRect.y = doubletemp;
 			
-			writeWords(upgradeList->list[i]->name,font,12,game,tempRect.x,tempRect.y + 20);
-			writeWordsMulti(upgradeList->list[i]->desc,font,12,game,tempRect.x,tempRect.y + 45,180);
-			tempRect.w = 190;
-			tempRect.h = 180;
 			doubletemp = tempRect.y;
-
+			
 			writeWords(upgradeList->list[i]->name,font,12,game,tempRect.x,tempRect.y + 20);
 			writeWordsMulti(upgradeList->list[i]->desc,font,12,game,tempRect.x,tempRect.y + 45,180);
 			
+			tempRect.y += 130 - tempRect.h;
 			tempRect.y = doubletemp;
-			tempRect.x += 20+ tempRect.w;
-			
+			tempRect.x += 190;
 			for(j=0;j<upgradeList->list[i]->size;j++)
 			{
 				tempImg = getImageByName(upgradeList->list[i]->nameList[j],items);
 				tempRect.w = tempImg->w;
 				tempRect.h = tempImg->h;
-				doubletemp = tempRect.y;
-				tempRect.y += 130 - tempRect.h;
-				while(tempRect.x+ tempRect.w>game->boundingBox.w)
+				
+				
+				if(tempRect.x + tempImg->w>game->boundingBox.w*3/4)
 				{
-					tempRect.y+=tempRect.h+20;
-					doubletemp+= tempRect.h+20;
-					tempRect.x -= game->boundingBox.w;
-					if(tempRect.x<20)
-						tempRect.x = 20;
+					tempRect.y+=tempImg->h+20;
+					tempRect.x = 40;
 				}
+				
+				tempRect.y += 130 - tempRect.h;
 				SDL_RenderCopy(game->renderer,tempImg->image,&tempImg->srcPos,&tempRect);
 				
-				tempRect.x += tempRect.w +20;
+				tempRect.y -= 130 - tempRect.h;
+	
 				numText[1] = '0'+ upgradeList->list[i]->numList[j];
-				tempRect.y = doubletemp;
-				writeWords(numText,font,12,game,tempRect.x-30,tempRect.y +130);
-			}
-			while(tempRect.x+ tempRect.w>game->boundingBox.w)
-			{
-				tempRect.y+=tempRect.h+20;
-				doubletemp+= tempRect.h+20;
-				tempRect.x -= game->boundingBox.w;
-				if(tempRect.x<20)
-					tempRect.x = 20;
-			}
-			
+				
+				writeWords(numText,font,12,game,tempRect.x+tempImg->w,tempRect.y +130);
+				
+
+				tempRect.x +=20+ tempImg->w;
+				
+			}			
 			if(upgradeJump)
 			{
 			
-				tempRect.y+=180;
+				tempRect.y+=140;
 				tempRect.x = 20;
-		
+			}
+			else if((upgradeList->list[i]->levels[0]>0 || upgradeList->list[i]->levels[1]>0 || upgradeList->list[i]->levels[2]>0 || upgradeList->list[i]->levels[3]>0 || upgradeList->list[i]->levels[4]>0))
+			{
+				tempRect.y+=110-getStatHeight(upgradeList->list[i]->levels,tinyResources);
+			
 			}
 			drawStats(upgradeList->list[i]->levels,tempRect.x+10,tempRect.y+25,game,font,tinyResources, 350);
-
-			tempRect.y = doubletemp;
+			if(upgradeJump)
+			{
+				tempRect.y-=140;
+			}
+			else if((upgradeList->list[i]->levels[0]>0 || upgradeList->list[i]->levels[1]>0 || upgradeList->list[i]->levels[2]>0 || upgradeList->list[i]->levels[3]>0 || upgradeList->list[i]->levels[4]>0))
+			{
+				tempRect.y-=110-getStatHeight(upgradeList->list[i]->levels,tinyResources);
+			}
 			tempRect.x = 20;
+			
 			if(!canUpgradeCraft(upgradeList->list[i],pile,items,levels))
 			{
-				width=190;
-				height = 180;
-				for(j=0;j<upgradeList->list[i]->size;j++)
-				{
-					tempImg = getImageByName(upgradeList->list[i]->nameList[j],items);
-					width +=tempImg->w+20;
-					if(width+ tempImg->w>game->boundingBox.w)
-					{
-						height+=tempImg->h+20;
-						width = game->boundingBox.w;
-					}
-				}
-				
-				if((upgradeList->list[i]->levels[0]>0 || upgradeList->list[i]->levels[1]>0 || upgradeList->list[i]->levels[2]>0 || upgradeList->list[i]->levels[3]>0 || upgradeList->list[i]->levels[4]>0))
-				{
-					
-					if(width + getStatWidth(upgradeList->list[i]->levels,tempRect.x,tempRect.y,game,font,tinyResources,350) > game->boundingBox.w)
-					{
-						height+=getStatHeight(upgradeList->list[i]->levels,tinyResources)+40;
-						upgradeJump=1;
-						if(getStatWidth(upgradeList->list[i]->levels,tempRect.x,tempRect.y,game,font,tinyResources,350)>width)
-							width = getStatWidth(upgradeList->list[i]->levels,tempRect.x,tempRect.y,game,font,tinyResources,350)+50;
-					}
-					else 
-					{
-						width+= getStatWidth(upgradeList->list[i]->levels,tempRect.x,tempRect.y,game,font,tinyResources,350);
-					}
-				}
-				bgRect.y = tempRect.y;
 				bgRect.x = 0;
-				for(j=0;j<((width>game->boundingBox.w)?game->boundingBox.w-60:width+60);j+=upgradeBlack->w)
+				for(j=0;j<maxwidth;j+=upgradeBlack->w)
 				{
 					if(j==0)
 						setToFrame(upgradeBlack,0,0);
 					else 
-						setToFrame(upgradeBlack,1+(j/upgradeBlack->w)%6,0);
+						setToFrame(upgradeBlack,1+(j/upgradeBackground->w)%6,0);
 					SDL_RenderCopy(game->renderer,upgradeBlack->image,&upgradeBlack->srcPos,&bgRect);
 					
 					doubletemp = bgRect.y;
@@ -2732,14 +2887,13 @@ int drawUpgrades(UpgradeList * upgradeList,Game * game,Font * font,Image * upgra
 				}
 				setToFrame(upgradeBlack,7,5);
 				SDL_RenderCopy(game->renderer,upgradeBlack->image,&upgradeBlack->srcPos,&bgRect);
-				bgRect.y = doubletemp;
 			}
 			else
 			{
 				bgRect.y = tempRect.y;
-				bgRect.w = width;
+				bgRect.w = (maxwidth/50+1)*50;
 				bgRect.x =0;
-				bgRect.h = height;
+				bgRect.h = (height/50+1)*50;
 				if(isClicked(&bgRect,game,game->currLayer))
 				{
 					if(game->chain->mouse == 1)
@@ -2751,7 +2905,7 @@ int drawUpgrades(UpgradeList * upgradeList,Game * game,Font * font,Image * upgra
 					
 				}
 			}
-			tempRect.y= doubletemp + height+60;
+			tempRect.y+=height+60;
 		}
 
 	}
@@ -2759,9 +2913,7 @@ int drawUpgrades(UpgradeList * upgradeList,Game * game,Font * font,Image * upgra
 	{
 		*canScroll += 2;
 	}
-	
 	*scrollmax = *scrolly - tempRect.y+ game->boundingBox.h;
-	
 	return retval;
 }
 
@@ -2941,4 +3093,324 @@ void unlockHouse(RecipeList * recipeList,char * name, char unlock)
 			recipeList->list[i]->unlocked = unlock;
 		}
 	}
+}
+
+looseItemList * initLooseList()
+{
+	looseItemList * list = malloc(sizeof(looseItemList));
+	list->size = 0;
+	list->capacity = 10;
+	list->list = malloc(sizeof(looseItem)*list->capacity);
+	return list;
+}
+void addItemToLooseList(looseItemList * list, Item * item, int type,int errata)
+{
+	if(list->size+1 >= list->capacity)
+	{
+		list->capacity *=2;
+		list->list = realloc(list->list,sizeof(looseItem)*list->capacity);
+	}
+	list->list[list->size].item = item;
+	list->list[list->size].type = type;
+	list->list[list->size].errata = errata;
+	list->size++;
+}
+void removeItemFromLooseList(looseItemList * list, Item * item)
+{
+	int i = 0;
+	char grab = 0;
+	for(i=0;i<list->size;i++)
+	{
+		if(grab == 1)
+		{
+			list->list[i-1].item = list->list[i].item;
+			list->list[i-1].type = list->list[i].type;
+			list->list[i-1].errata = list->list[i].errata;
+		}
+		else if (list->list[i].item == item)
+		{
+			grab = 1;
+		}
+	}
+	list->size--;
+}
+
+void removeQueuedLooseItems(looseItemList * list,int id)
+{
+	int i = 0;
+	char grab = 1;
+	while (grab)
+	{
+		grab = 0;
+		for(i=0;i<list->size;i++)
+		{
+			if(grab == 1)
+			{
+				list->list[i-1].item = list->list[i].item;
+				list->list[i-1].type = list->list[i].type;
+				list->list[i-1].errata = list->list[i].errata;
+			}
+			else if (list->list[i].type == 1 && list->list[i].errata == id)
+			{
+				grab = 1;
+			}
+		}
+		if(grab)
+			list->size--;
+	}
+	for(i=0;i<list->size;i++)
+	{
+		if(list->list[i].type == 1)
+		{
+			list->list[i].errata--;
+		}
+	}
+}
+Item * grabItemFromLoose(looseItemList * list, int pos)
+{
+	Item * retval = NULL;
+	int i;
+	for(i=0;i<list->size;i++)
+	{
+		if(list->list[i].type == 3 && pos == list->list[i].item->image->x)
+		{
+			retval = list->list[i].item;
+			removeItemFromLooseList(list,retval);
+			break;
+		}
+	}
+	return retval;
+}
+int looseItemGrabbable(looseItemList * list)
+{
+	int i;
+	for(i=0;i<list->size;i++)
+	{
+		if(list->list[i].type == 2)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+int canAmbulate(House** houseList, int houseNum,int x, int y, int xTo, int yTo,int looseX)
+{
+	int i;
+	int dir = -1;
+	int index = -1;
+	int loop = 1;
+	int loose = 0;
+	int firstIndex = -1;
+	if (y<yTo)
+	{
+		dir =1;
+	}
+	else
+	{
+		dir = -1;
+	}
+	if(abs(y-yTo)<3)
+	{
+		return 0;
+	}
+	
+	for(i=0;i<houseNum;i++)
+	{
+		if(abs(houseList[i]->image->x-x)<houseList[i]->image->w && abs(houseList[i]->image->y-y)<houseList[i]->image->h )
+		{
+			index = i;
+			break;
+		}
+	}
+	
+	if (index ==-1)
+	{
+		
+		for(i=0;i<houseNum;i++)
+		{
+			if(abs(houseList[i]->image->x-xTo)<houseList[i]->image->w && abs(houseList[i]->image->y-yTo)<houseList[i]->image->h )
+			{
+				index = i;
+				dir = -dir;
+				loose = 1;
+				break;
+			}
+		}
+		if(index == -1)
+		{
+			return 0;
+		}
+	}
+	while (loop)
+	{
+		loop = 0;
+		for(i=0;i<houseNum;i++)
+		{
+			if(i != index && dir == -1)
+			{
+				if(houseList[i]->image->y + 89 == houseList[index]->image->y)
+				{
+					if(abs(houseList[index]->image->x-houseList[i]->image->x)<houseList[index]->image->w)
+					{
+						if(abs(houseList[i]->image->y+houseList[i]->image->h-yTo)<30)
+						{
+							if(firstIndex>=0)
+							{
+								if(!loose)
+								{
+									if(houseList[firstIndex]->image->x<x && houseList[firstIndex]->image->x+houseList[firstIndex]->image->w>x )
+									{
+										return 2;
+									}
+									else if(houseList[firstIndex]->image->x+houseList[firstIndex]->image->w/2<x)
+										return -1;
+									else
+										return 1;
+								}
+								else
+								{
+									if(houseList[firstIndex]->image->x<x && houseList[firstIndex]->image->x+houseList[firstIndex]->image->w>x )
+									{
+										return 2;
+									}
+									else if(houseList[firstIndex]->image->x+houseList[firstIndex]->image->w/2<x)
+										return 1;
+									else
+										return -1;
+								}
+							}
+							else
+							{
+								if(!loose)
+								{
+									if(houseList[i]->image->x<x && houseList[i]->image->x+houseList[i]->image->w>x )
+									{
+										return 2;
+									}
+									else if(houseList[i]->image->x+houseList[i]->image->w/2<x)
+										return -1;
+									else
+										return 1;
+								}
+								else
+								{
+									if(houseList[i]->image->x<x && houseList[i]->image->x+houseList[i]->image->w>x )
+									{
+										return 2;
+									}
+									else if(houseList[i]->image->x+houseList[i]->image->w/2<x)
+										return 1;
+									else
+										return -1;
+								}
+							}
+						}
+						else
+						{
+							index = i;
+							if(firstIndex<0)
+								firstIndex = i;
+							loop = 1;
+							break;
+						}
+						
+					}
+					
+					
+				}
+			}
+			else if(i != index && dir == 1)
+			{
+				if(houseList[i]->image->y - 89 == houseList[index]->image->y)
+				{
+					if(abs(houseList[index]->image->x-houseList[i]->image->x)<houseList[index]->image->w)
+					{
+						if(abs(houseList[i]->image->y+houseList[i]->image->h-yTo-30)<30)
+						{
+							if(firstIndex>=0)
+							{
+								if(!loose)
+								{
+									if(houseList[firstIndex]->image->x<x && houseList[firstIndex]->image->x+houseList[firstIndex]->image->w>x )
+									{
+										return 2;
+									}
+									else if(houseList[firstIndex]->image->x+houseList[firstIndex]->image->w/2<x)
+										return -1;
+									else
+										return 1;
+								}
+								else
+								{
+									if(houseList[firstIndex]->image->x<x && houseList[firstIndex]->image->x+houseList[firstIndex]->image->w>x )
+									{
+										return 2;
+									}
+									else if(houseList[firstIndex]->image->x+houseList[firstIndex]->image->w/2<x)
+										return 1;
+									else
+										return -1;
+								}
+							}
+							else
+							{
+								if(!loose)
+								{
+									
+									if(houseList[i]->image->x<x && houseList[i]->image->x+houseList[i]->image->w>x )
+									{
+										return 2;
+									}
+									else if(houseList[i]->image->x+houseList[i]->image->w/2<x)
+									{
+										
+										return -1;
+									}
+									else
+									{
+										return 1;
+										
+									}
+								}
+								else
+								{
+									if(houseList[i]->image->x<x && houseList[i]->image->x+houseList[i]->image->w>x )
+									{
+										return 2;
+									}
+									else if(houseList[i]->image->x+houseList[i]->image->w/2<x)
+										return 1;
+									else
+										return -1;
+								}
+							}
+						}
+						else
+						{
+							index = i;
+							if(firstIndex<0)
+								firstIndex = i;
+							loop =1;
+							break;
+						}
+					}
+					
+				}
+			}
+		}
+	}
+	if(!loose)
+	{
+		
+		if(abs(y-yTo)>3)
+			return 2;
+	}
+	else if(loose)
+	{
+		if(houseList[index]->image->x+houseList[index]->image->w/2<x)
+			return -1;
+		else
+			return 1;
+	}
+	return 0;
 }

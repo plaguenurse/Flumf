@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -22,7 +23,7 @@ int main(void)
 	Image* smolEgg, * bkgrnd, * flumfAnim, * error;
 	Image *newGameImage, *continueGameImage, *mainMenu, *forgeInfo;
 	Image * adventureButton,*craftButton,*leftArrow,*rightArrow,*upArrow,*downArrow, *close, *forgeButton, *natureButton;
-	Image * statusButton, *flumfButton, *upgradeButton;
+	Image * statusButton, *flumfButton, *upgradeButton, *moveButton;
 	Image * levelBar, *forgeSlice, *forgeLeftMenu, *tinyResources, *palLevelOutline, * ordering;
 	double flumfAuto = 0;
 	Image * dirtPile, *growing, *grown, *shadowLeftMenu;
@@ -48,6 +49,8 @@ int main(void)
 	int maxscroll = 0;
 
 	int moxieBonus = 0;
+	int chutzpahBonus = 0;
+	int wonderBonus = 0;
 	
 	Enemy ** enemylist;
 	int enemylistsize = 0;
@@ -91,9 +94,13 @@ int main(void)
 	int specialization = 0;
 	int houseMove = 0;
 	
+
+	looseItemList * looseList = initLooseList();
+	
 	House * movingHouse = NULL;
 	
 	int clickable = 0;
+	int attackable = 0;
 	
 	int inMenu = 0;
 	int craft = 0; 
@@ -107,6 +114,8 @@ int main(void)
 	int currExploringPals = 0;
 	int chutzpahGravyBoat = 0, pendingChutzpah = 0;
 	char redrawHouses = 0, redrawMenu = 0;
+	
+	Mix_Chunk * backgroundMusic;
 	
 	srand(time(NULL));
 	SDL_ShowCursor(SDL_DISABLE);
@@ -145,6 +154,7 @@ int main(void)
 
 	close = loadImage("images/buttons/close.png",1,1,game);
 	craftButton = loadImage("images/buttons/recipe.png",1,1,game);
+	moveButton = loadImage("images/buttons/move.png",1,1,game);
 	upgradeButton = loadImage("images/buttons/upgrade.png",1,1,game);
 	forgeButton = loadImage("images/buttons/forge.png",1,1,game);
 	statusButton = loadImage("images/buttons/party.png",1,1,game);
@@ -155,7 +165,7 @@ int main(void)
 	upArrow = loadImage("images/buttons/u-arrow.png", 1,1,game);
 	downArrow = loadImage("images/buttons/d-arrow.png", 1,1,game);
 	
-	cursor = loadImage("images/pointer.png", 2, 1,game);
+	cursor = loadImage("images/pointer.png", 3, 1,game);
 	mainMenu = loadImage("images/flumf-menu.png", 1, 1,game);
 	newGameImage = loadImage("images/newgame.png", 1, 1,game);
 	continueGameImage = loadImage("images/continuegame.png", 1, 2,game);
@@ -170,15 +180,20 @@ int main(void)
 
 	font = newFont(loadImage("images/font.png",13,5,game));
 
+	
+
+	backgroundMusic = Mix_LoadWAV("sounds/backgroundMusic.wav");
+
 
 	moveImageTo(flumfImg, background->w-flumfImg->w,background->h-30-flumfImg->h);
 	
 	
 	moveImageTo(statusButton,statusButton->w+10,0);
 	moveImageTo(craftButton,(craftButton->w+10)*2,0);
-	moveImageTo(forgeButton,(forgeButton->w+10)*3,0);
-	moveImageTo(upgradeButton,0,(upgradeButton->h+10));
-	moveImageTo(natureButton,(natureButton->w+10),(natureButton->h+10));
+	moveImageTo(moveButton,(moveButton->w+10)*3,0);
+	moveImageTo(forgeButton,(forgeButton->w+10)*0,(upgradeButton->h+10));
+	moveImageTo(upgradeButton,(upgradeButton->w+10)*1,(upgradeButton->h+10));
+	moveImageTo(natureButton,(natureButton->w+10)*2,(natureButton->h+10));
 	
 	itemList = getList("lists/itemList.txt",game);
 	housey = background->h-119;
@@ -195,6 +210,7 @@ int main(void)
 	{
 		setToFrame(continueGameImage,0,1);
 	}
+	addLayer(game,3072,640);
 	addLayer(game,3072,640);
 	addLayer(game,3072,640);
 	addLayer(game,3072,640);
@@ -248,16 +264,17 @@ int main(void)
 		display(game);
 	}
 	clearLayer(game);
-	swapLayers(game,0,3);
+	swapLayers(game,0,4);
 	moveLayer(game,0,-256,0);
 	moveLayer(game,0,-256,1);
+	moveLayer(game,0,-256,2);
 
-	
-	
-
+	//Mix_Volume(1,MIX_MAX_VOLUME);
+	Mix_Volume(1,0);
 	housex = pile->image->x-100;
 	if(newGame == 1)
 	{
+		Mix_PlayChannel(-1, backgroundMusic, -1);
 		houseNum++;
 		houseList = realloc(houseList,sizeof(House*)*houseNum);
 		houseList[houseNum-1] = newHouse(game,housex,housey,3);
@@ -272,6 +289,7 @@ int main(void)
 	}
 	else if(newGame == 0)
 	{
+		Mix_PlayChannel(-1, backgroundMusic, -1);
 		fgets(temp,80,savefile);
 		while(!feof(savefile))
 		{
@@ -378,6 +396,7 @@ int main(void)
 		fclose(savefile);
 	}
 	
+	
 	//initial setup alignment	
 	moveImageTo(background,0,0);
 	moveImageTo(leftArrow,0,(game->boundingBox.h-leftArrow->h)/2);
@@ -391,6 +410,7 @@ int main(void)
 	moveLayer(game,-scrollmin,0,0);	
 	moveLayer(game,-scrollmin,0,1);	
 	moveLayer(game,-scrollmin,0,2);
+	moveLayer(game,-scrollmin,0,3);
 
 	
 	//Drawing background layer
@@ -413,7 +433,7 @@ int main(void)
 	drawImage(craftButton,game);
 	drawImage(flumfButton,game);
 	if(hasUpgrade)
-	drawImage(upgradeButton,game);
+		drawImage(upgradeButton,game);
 	if(hasForge)
 		drawImage(forgeButton,game);
 	drawImage(leftArrow,game);
@@ -427,6 +447,7 @@ int main(void)
 	while(!game->chain->close)
 	{
 		clickable = 0;
+		attackable = 0;
 		getEvents(game->chain, game);
 		
 		if(redrawHouses == 1)
@@ -463,8 +484,13 @@ int main(void)
 					if(houseList[houseNum-1]->type==1)
 						hasForge = 1;
 					if(houseList[houseNum-1]->type==8)
+					{
+						unlockHouse(recipeList, "Upgrade",0);
+						wonderModifier++;
 						hasUpgrade = 1;
+					}
 					removeFromQueue(queue,i);
+					removeQueuedLooseItems(looseList,i);
 					redrawHouses = 1;
 				} 
 			}
@@ -472,7 +498,7 @@ int main(void)
 		}		
 		
 				
-		if(!inMenu && isClicked(&adventureButton->destPos,game,3))
+		if(!inMenu && isClicked(&adventureButton->destPos,game,4))
 		{
 			if(game->chain->mouse == 1)
 			{
@@ -487,11 +513,13 @@ int main(void)
 							if(houseList[i]->pals[k]->status == 0)
 							{
 								houseList[i]->pals[k]->status = 1;
+								houseList[i]->pals[k]->posToY = background->h-30 - houseList[i]->pals[k]->image->h;
+								houseList[i]->pals[k]->posToX = 0;
 								houseList[i]->pals[k]->timer = 50;
 								houseList[i]->pals[k]->delay = 5*j;
 								j++;
-								chutzpahGravyBoat += getChutzpah(houseList[i]->pals[k]);
-								wonderTeaSet +=getWonder(houseList[i]->pals[k]);
+								chutzpahGravyBoat += getChutzpah(houseList[i]->pals[k])+chutzpahBonus;
+								wonderTeaSet +=getWonder(houseList[i]->pals[k])+wonderBonus;
 								currOutPals++;
 								currExploringPals++;
 							}
@@ -524,10 +552,12 @@ int main(void)
 					if(houseList[i]->pals[k]->status == 0)
 					{
 						houseList[i]->pals[k]->status = 1;
+						houseList[i]->pals[k]->posToY = background->h-30 - houseList[i]->pals[k]->image->h;
+						houseList[i]->pals[k]->posToX = 0;
 						houseList[i]->pals[k]->timer = 50;
 						houseList[i]->pals[k]->delay = 5*j;
-						chutzpahGravyBoat += getChutzpah(houseList[i]->pals[k]);
-						wonderTeaSet +=getWonder(houseList[i]->pals[k]);
+						chutzpahGravyBoat += getChutzpah(houseList[i]->pals[k])+chutzpahBonus;
+						wonderTeaSet +=getWonder(houseList[i]->pals[k])+wonderBonus;
 						currOutPals++;
 						currExploringPals++;
 						if(currOutPals*1.0/currTotalPals >= flumfAuto)
@@ -557,9 +587,9 @@ int main(void)
 						}
 						houseList[i]->pals[j]->status = -1;//They're yanking it REAL HAERD
 						avgmoxie += getMoxie(houseList[i]->pals[j],moxieBonus);
-						pendingChutzpah -= getChutzpah(houseList[i]->pals[j]);
+						pendingChutzpah -= getChutzpah(houseList[i]->pals[j])+chutzpahBonus;
 						chutzpahGravyBoat -= getChutzpah(houseList[i]->pals[j]);
-						wonderTeaSet -= getWonder(houseList[i]->pals[j]);
+						wonderTeaSet -= getWonder(houseList[i]->pals[j])+wonderBonus;
 						currExploringPals--;
 						houseList[i]->pals[j]->chutzpah++;
 						palsPullingPals[palpullsize] = houseList[i]->pals[j];
@@ -579,6 +609,8 @@ int main(void)
 							{
 								palsPullingPals[l]->burdenedmoxie = avgmoxie;
 								palsPullingPals[l]->status = 2;
+								palsPullingPals[l]->posToY = background->h-30 -palsPullingPals[l]->image->h;
+								palsPullingPals[l]->posToX = pile->image->x;
 								moveAdventurer(palsPullingPals[l],palsPullingPals[0]->image->x - (pendingItem->image->w/(palpullsize))*l - palsPullingPals[l]->image->x,0);		
 							}
 							
@@ -602,6 +634,8 @@ int main(void)
 				{
 					putInPile(pile,houseList[i]->pals[j]->item);
 					redrawHouses=1;
+					houseList[i]->pals[j]->posToX = houseList[i]->image->x;
+					houseList[i]->pals[j]->posToY = houseList[i]->image->y+ houseList[i]->image->h;
 					houseList[i]->pals[j]->item = NULL;
 					houseList[i]->pals[j]->status = 3;
 				}
@@ -612,7 +646,7 @@ int main(void)
 		for(i=0;i<houseNum;i++)
 		{
 			
-			if(houseMove == 0 && !inMenu && isClicked(&houseList[i]->image->destPos,game,1) && canRemove(houseList,houseNum,houseList[i]))
+			if(houseMove == 0 && inMenu == 7 && isClicked(&houseList[i]->image->destPos,game,1) && canRemove(houseList,houseNum,houseList[i]))
 			{
 				if(game->chain->mouse == 1)
 				{
@@ -625,7 +659,7 @@ int main(void)
 			for(j=0;j<houseList[i]->size;j++)
 			{
 
-				adventurerDo(houseList[i]->pals[j], game, itemList, houseList[i]->image->x + houseList[i]->image->w/2,houseList[i]->image->y,&currOutPals,&redrawHouses,&visEggSize,moxieBonus,scrollmin);
+				adventurerDo(houseList[i]->pals[j], game, itemList, houseList[i]->image->x + houseList[i]->image->w/2,houseList[i]->image->y,&currOutPals,&redrawHouses,&visEggSize,moxieBonus,scrollmin,houseList,houseNum);
 		
 				
 				if(houseList[i]->pals[j]->status == 5 && houseList[i]->pals[j]->item==NULL )
@@ -644,7 +678,8 @@ int main(void)
 				}
 				else if(houseList[i]->pals[j]->status == 6 && houseList[i]->pals[j]->item!=NULL)
 				{
-					removeNextItemQueue(queue,houseList[i]->pals[j]->item);
+					moveImage(houseList[i]->pals[j]->item->image,0,houseList[i]->pals[j]->image->h);
+					addItemToLooseList(looseList,houseList[i]->pals[j]->item,1,removeNextItemQueue(queue,houseList[i]->pals[j]->item));
 					houseList[i]->pals[j]->item = NULL;
 				}
 				else if(houseList[i]->pals[j]->status == 8)
@@ -655,6 +690,18 @@ int main(void)
 					temprect.y = houseList[i]->pals[j]->image->y - smolEgg->h;
 					SDL_RenderCopy(game->renderer,smolEgg->image,&smolEgg->srcPos,&temprect);	
 				}
+				else if(houseList[i]->pals[j]->status == 0 && (p=looseItemGrabbable(looseList))>=0)
+				{
+					houseList[i]->pals[j]->posToX = looseList->list[p].item->image->x;
+					houseList[i]->pals[j]->status = 10;
+					looseList->list[p].type = 3;
+				}
+				else if(houseList[i]->pals[j]->status == 11)
+				{
+					houseList[i]->pals[j]->item = grabItemFromLoose(looseList,houseList[i]->pals[j]->posToX);
+					moveImage(houseList[i]->pals[j]->item->image,-houseList[i]->pals[j]->item->image->w/2+houseList[i]->pals[j]->image->w/2,-houseList[i]->pals[j]->image->h);
+					houseList[i]->pals[j]->status = 2;
+				}
 				else if(houseList[i]->size + houseList[i]->pending < houseList[i]->capacity && houseList[i]->pals[j]->status == 0 && eggSize > 0)
 				{
 					currOutPals++;
@@ -662,7 +709,7 @@ int main(void)
 					houseList[i]->pals[houseList[i]->size+houseList[i]->pending]= queuedEggs[eggSize - 1];
 					
 					moveImageTo(queuedEggs[eggSize - 1]->image,houseList[i]->image->x + houseList[i]->image->w/2 - queuedEggs[eggSize - 1]->image->x/2, queuedEggs[eggSize - 1]->image->y);
-					moveImageTo(queuedEggs[eggSize - 1]->image,queuedEggs[eggSize - 1]->image->x,game->boundingBox.h-30 - queuedEggs[eggSize - 1]->image->h);
+					moveImageTo(queuedEggs[eggSize - 1]->image,queuedEggs[eggSize - 1]->image->x,background->h-30 - queuedEggs[eggSize - 1]->image->h);
 					houseList[i]->pals[j]->posTo = i;
 					houseList[i]->pending++;
 					eggSize--;
@@ -699,7 +746,7 @@ int main(void)
 					houseList[i]->pals[houseList[i]->size+houseList[i]->pending]= queuedEggs[eggSize - 1];
 
 					moveImageTo(queuedEggs[eggSize - 1]->image,houseList[i]->image->x + houseList[i]->image->w/2 - queuedEggs[eggSize - 1]->image->x/2, queuedEggs[eggSize - 1]->image->y);
-					moveImageTo(queuedEggs[eggSize - 1]->image,queuedEggs[eggSize - 1]->image->x,game->boundingBox.h-30 - queuedEggs[eggSize - 1]->image->h);
+					moveImageTo(queuedEggs[eggSize - 1]->image,queuedEggs[eggSize - 1]->image->x,background->h-30 - queuedEggs[eggSize - 1]->image->h);
 					houseList[k]->pals[l]->posTo = i;
 					houseList[i]->pending++;
 					eggSize--;
@@ -709,6 +756,11 @@ int main(void)
 			}
 		}
 		
+		
+		for(i = 0; i< looseList->size;i++)
+		{
+			drawImage(looseList->list[i].item->image,game);
+		}
 		//Enemy Behaviour Start
 		
 		for(i =0;i<enemylistsize;i++)
@@ -723,20 +775,28 @@ int main(void)
 					moveImageTo(enemylist[i]->item->image,enemylist[i]->image->x-enemylist[i]->item->image->w/2+enemylist[i]->image->w/2,enemylist[i]->image->y - enemylist[i]->item->image->h);
 			}
 			
-			temprect.x=enemylist[i]->image->x-enemylist[i]->image->w/2;
-			temprect.y=enemylist[i]->image->y-enemylist[i]->image->h/2;
-			temprect.w=enemylist[i]->image->w*2;
-			temprect.h=enemylist[i]->image->h*2;
+			temprect.x=enemylist[i]->image->x-enemylist[i]->image->w*3/2;
+			temprect.y=enemylist[i]->image->y-enemylist[i]->image->h*3/2;
+			temprect.w=enemylist[i]->image->w*3;
+			temprect.h=enemylist[i]->image->h*3;
 			SDL_RenderDrawRect(game->renderer,&temprect);
-			if (isClicked(&temprect,game,2) && game->chain->mouse == 1)
+			if (!inMenu && isClicked(&temprect,game,2))
 			{
-				game->chain->mouse = 2;
-				enemylist[i]->health -=playerDamage;
+				if(game->chain->mouse ==1)
+				{
+					game->chain->mouse = 2;
+					enemylist[i]->health -=playerDamage;
+				}
+				attackable = 1;
 			}
 			
 			if((enemylist[i]->status ==2 && enemylist[i]->image->x<0) || enemylist[i]->health<=0)
 			{
-				
+				if(enemylist[i]->health<=0 && enemylist[i]->item !=NULL)
+				{
+					moveImage(enemylist[i]->item->image,0,enemylist[i]->image->h);
+					addItemToLooseList(looseList,enemylist[i]->item,2,0);
+				}
 				for(int j=i+1;j<enemylistsize;j++)
 				{
 					enemylist[j-1]=enemylist[j];
@@ -746,7 +806,7 @@ int main(void)
 		}
 		if(enemyTimer == 0)
 		{
-			if(totalPals*10<pile->total)
+			if(totalPals<pile->total && pile->total > 30)
 			{
 				enemylistsize++;
 				if(enemylistsize>=enemylistcapacity)
@@ -756,7 +816,7 @@ int main(void)
 				}
 				enemylist[enemylistsize-1] = newEnemy(1,game);
 				enemylist[enemylistsize-1]->status = 1;
-				moveImageTo(enemylist[enemylistsize-1]->image,0,game->boundingBox.h - 30- enemylist[enemylistsize-1]->image->h);
+				moveImageTo(enemylist[enemylistsize-1]->image,0,background->h - 30- enemylist[enemylistsize-1]->image->h);
 				enemyTimer = enemyTimerMax;
 			}
 		}
@@ -812,7 +872,7 @@ int main(void)
 		//
 		}
 		
-		if(!inMenu && isClicked(&flumfButton->destPos,game,3))
+		if(!inMenu && isClicked(&flumfButton->destPos,game,4))
 		{
 			if(game->chain->mouse == 1 )
 			{
@@ -821,7 +881,7 @@ int main(void)
 			}
 			clickable = 1;
 		}
-		else if(!inMenu && isClicked(&statusButton->destPos,game,3))
+		else if(!inMenu && isClicked(&statusButton->destPos,game,4))
 		{
 			if(game->chain->mouse == 1 )
 			{
@@ -830,7 +890,16 @@ int main(void)
 			}
 			clickable = 1;
 		}
-		else if(!inMenu && isClicked(&craftButton->destPos,game,3))
+		else if(!inMenu && isClicked(&moveButton->destPos,game,4))
+		{
+			if(game->chain->mouse == 1 )
+			{
+			inMenu = 7;
+			game->chain->mouse = 2;
+			}
+			clickable = 1;
+		}
+		else if(!inMenu && isClicked(&craftButton->destPos,game,4))
 		{
 			if(game->chain->mouse == 1 )
 			{
@@ -839,7 +908,7 @@ int main(void)
 			}
 			clickable = 1;
 		}
-		else if(!inMenu && isClicked(&forgeButton->destPos,game,3) && hasForge)
+		else if(!inMenu && isClicked(&forgeButton->destPos,game,4) && hasForge)
 		{
 			if(game->chain->mouse == 1 )
 			{
@@ -848,7 +917,7 @@ int main(void)
 			}
 			clickable = 1;
 		}
-		else if(!inMenu && isClicked(&natureButton->destPos,game,3) && specialization == 4)
+		else if(!inMenu && isClicked(&natureButton->destPos,game,4) && specialization == 4)
 		{
 			if(game->chain->mouse == 1 )
 			{
@@ -858,7 +927,7 @@ int main(void)
 			clickable = 1;
 		}
 		
-		else if(!inMenu && isClicked(&upgradeButton->destPos,game,3) && hasUpgrade)
+		else if(!inMenu && isClicked(&upgradeButton->destPos,game,4) && hasUpgrade)
 		{
 			if(game->chain->mouse == 1 )
 			{
@@ -870,174 +939,63 @@ int main(void)
 		
 
 		
-		if(!inMenu && isClicked(&rightArrow->destPos,game,3))
+		if((!inMenu || inMenu==7) && isClicked(&rightArrow->destPos,game,4))
 		{
 			if(-game->layerList[0]->scrollDest.x < game->layerList[0]->scrollDest.w-game->boundingBox.w)
 			{
 				moveLayer(game,-4,0,0);	
 				moveLayer(game,-4,0,1);	
 				moveLayer(game,-4,0,2);
+				moveLayer(game,-4,0,3);
 				redrawMenu = 1;
 				clickable = 1;
 			}
 			
 		}
-		else if(!inMenu && isClicked(&leftArrow->destPos,game,3))
+		else if((!inMenu || inMenu==7) && isClicked(&leftArrow->destPos,game,4))
 		{
 			if(game->layerList[0]->scrollDest.x < -scrollmin)
 			{
 				moveLayer(game,4,0,0);	
 				moveLayer(game,4,0,1);	
 				moveLayer(game,4,0,2);
+				moveLayer(game,4,0,3);
 				redrawMenu = 1;
 				clickable = 1;
 			}
 		}
-		else if(!inMenu && isClicked(&upArrow->destPos,game,3))
+		else if((!inMenu || inMenu==7)&& isClicked(&upArrow->destPos,game,4))
 		{
 			if(game->layerList[0]->scrollDest.y < 0)
 			{
 				moveLayer(game,0,4,0);	
 				moveLayer(game,0,4,1);	
 				moveLayer(game,0,4,2);
+				moveLayer(game,0,4,3);
 				redrawMenu = 1;
 				clickable = 1;
 			}
 		}
-		else if(!inMenu && isClicked(&downArrow->destPos,game,3))
+		else if((!inMenu || inMenu==7)&& isClicked(&downArrow->destPos,game,4))
 		{
 			if(-game->layerList[0]->scrollDest.y < game->layerList[0]->scrollDest.h-game->boundingBox.h)
 			{
 				moveLayer(game,0,-4,0);	
 				moveLayer(game,0,-4,1);	
 				moveLayer(game,0,-4,2);
+				moveLayer(game,0,-4,3);
 				redrawMenu = 1;
 				clickable = 1;
 			}
 		}
 		
-	
-		if (houseMove>0)
-		{
-			setLayer(game,1);
-			for(i=0;i<queue->size;i++)
-			{
-				if(queue->queue[i]->type == 1)
-				{
-					setToFrame(((House*)(queue->queue[i]->queued))->image,1,0);
-					drawImage(((House*)(queue->queue[i]->queued))->image,game);
-					setToFrame(((House*)(queue->queue[i]->queued))->image,0,0);
-				}
-			}
-			setLayer(game,2);
-			housex = game->chain->vx - movingHouse->image->w/6 -game->layerList[1]->scrollDest.x;
-			housey = background->h-119 + ((game->chain->vy-background->h+119-43-game->layerList[1]->scrollDest.y)/89)*89;
-			if(housex+movingHouse->image->w>=pile->image->x)
-			{
-				housex=pile->image->x-movingHouse->image->w;
-			}
-			else if(housex<0)
-			{
-				housex=0;
-			}
-			moveImageTo(movingHouse->image,housex,housey);
-			setLayer(game,1);
-			redrawHouses = 1;
-			drawImage(movingHouse->image,game);
-			
-		
-			
-			setLayer(game,2);
-			
-			if(canPlace(houseList,houseNum,movingHouse,background->h))
-			{
-				
-				setToFrame(movingHouse->image,1,0);
-				
-				if(game->chain->mouse==1)
-				{
-					setToFrame(movingHouse->image,0,0);
-					game->chain->mouse = 2;
-					if(houseMove==1)
-					{
-						addHouseToQueue(queue,movingHouse,recipeList->list[craft-1],pile,itemList);
-						movingHouse->posX = housex;
-						movingHouse->posY = housey;
-						
-						for(i=0;i<5;i++)
-						{
-							levels[i]-=recipeList->list[craft-1]->levels[i];
-						}
-						if(movingHouse->type == 1)
-						{
-							unlockTier(2,recipeList);
-							unlockTier(3,recipeList);
-							recipeList->list[0]->unlocked = 0;
-							wonderModifier++;
-						}
-						if(movingHouse->type== 4)
-						{
-							specialization = 1;
-							lockTier(3,recipeList);
-						}
-						if(movingHouse->type== 5)
-						{
-							specialization = 2;
-							lockTier(3,recipeList);
-						}
-						if(movingHouse->type== 6)
-						{
-							specialization = 4;
-							lockTier(3,recipeList);
-						}
-						if(movingHouse->type== 9)
-						{
-							specialization = 3;
-							lockTier(3,recipeList);
-						}
-						if(movingHouse->type == 8)
-						{
-							recipeList->list[7]->unlocked = 0;
-							wonderModifier++;
-						}
-					}
-					else if (houseMove==2)
-					{
-						for(j=0;j<movingHouse->size;j++)
-						{
-							if(movingHouse->pals[j]->status == 0)
-							{
-								moveImageTo(houseList[i]->pals[j]->image,movingHouse->posX+movingHouse->image->w/2,houseList[i]->pals[j]->image->y);
-							}
-						}
-					}
-					houseMove = 0;
-				}
-			}
-			else
-			{
-				setToFrame(movingHouse->image,2,0);
-				if(game->chain->mouse==1)
-				{
-					game->chain->mouse = 2;
-					if(houseMove==2)
-					{
-						setToFrame(movingHouse->image,0,0);
-						moveImageTo(movingHouse->image,movingHouse->posX,movingHouse->posY);
-					}
-					houseMove = 0;
-				}
-				
-			}
-			
-		}	
 		else if(inMenu != 0)
 		{
 			if(inMenu == 1)
 			{
-				setLayer(game,3);
+				setLayer(game,4);
 				clearLayer(game);
-				if(isClicked(&close->destPos,game,3))
+				if(isClicked(&close->destPos,game,4))
 				{
 					if(game->chain->mouse==1)
 					{
@@ -1074,9 +1032,9 @@ int main(void)
 			}
 			if (inMenu ==2)
 			{
-				setLayer(game,3);
+				setLayer(game,4);
 				clearLayer(game);
-				if(isClicked(&close->destPos,game,3))
+				if(isClicked(&close->destPos,game,4))
 				{
 					if(game->chain->mouse==1)
 					{
@@ -1122,11 +1080,11 @@ int main(void)
 				drawImage(close,game);
 				setLayer(game,2);
 			}
-			if (inMenu == 3)
+			else if (inMenu == 3)
 			{
-				setLayer(game,3);
+				setLayer(game,4);
 				clearLayer(game);
-				if(isClicked(&close->destPos,game,3))
+				if(isClicked(&close->destPos,game,4))
 				{
 					if(game->chain->mouse==1)
 					{
@@ -1144,7 +1102,7 @@ int main(void)
 				}
 				else if(craft>0)
 				{
-					inMenu = 0;
+					inMenu = 7;
 					redrawMenu = 1;
 					houseMove = 1;
 					movingHouse = newHouseByName(game,0,0,recipeList->list[craft-1]->name);
@@ -1155,9 +1113,9 @@ int main(void)
 			}
 			else if (inMenu == 4)
 			{
-				setLayer(game,3);
+				setLayer(game,4);
 				clearLayer(game);
-				if(isClicked(&close->destPos,game,3))
+				if(isClicked(&close->destPos,game,4))
 				{
 					if(game->chain->mouse==1)
 					{
@@ -1214,7 +1172,7 @@ int main(void)
 						else
 							queuedEggs = realloc(queuedEggs,sizeof(Adventurer*)*eggSize);
 						queuedEggs[eggSize - 1]=newAdventurer(1,game);
-						moveImageTo(queuedEggs[eggSize - 1]->image,queuedEggs[eggSize - 1]->image->x,game->boundingBox.h-30 - queuedEggs[eggSize - 1]->image->h);
+						moveImageTo(queuedEggs[eggSize - 1]->image,queuedEggs[eggSize - 1]->image->x,background->h-30 - queuedEggs[eggSize - 1]->image->h);
 						
 					}
 					
@@ -1223,9 +1181,9 @@ int main(void)
 			}
 			else if(inMenu == 5)
 			{
-				setLayer(game,3);
+				setLayer(game,4);
 				clearLayer(game);
-				if(isClicked(&close->destPos,game,3))
+				if(isClicked(&close->destPos,game,4))
 				{
 					if(game->chain->mouse==1)
 					{
@@ -1240,7 +1198,7 @@ int main(void)
 				drawImage(menuImg,game);
 				if(growItem == NULL)
 				{
-					grabbed = drawPileDetailSub(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,0,0,0,1,0,&maxscroll, &clickable,&selectionInfo ,selectionMenu);
+					grabbed = drawPileDetailSub(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,0,0,0,1,0,&maxscroll, &clickable,&selectionInfo ,selectionMenu, ordering);
 					if(grabbed!=NULL)
 					{
 						grabbed->size--;
@@ -1250,15 +1208,6 @@ int main(void)
 				}
 				else
 				{
-					if(clickable == 0)
-					{
-						drawPileDetailSub(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,0,0,0,1,0,&maxscroll, &clickable,&selectionInfo ,selectionMenu);
-						clickable = 0;
-					}
-					else
-					{
-						drawPileDetailSub(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,0,0,0,1,0,&maxscroll, &clickable,&selectionInfo ,selectionMenu);
-					}
 					
 					drawImage(shadowLeftMenu,game);
 					if(growTimer == 0)
@@ -1306,9 +1255,9 @@ int main(void)
 			}
 			else if (inMenu == 6)
 			{
-				setLayer(game,3);
+				setLayer(game,4);
 				clearLayer(game);
-				if(isClicked(&close->destPos,game,3))
+				if(isClicked(&close->destPos,game,4))
 				{
 					if(game->chain->mouse==1)
 					{
@@ -1320,7 +1269,7 @@ int main(void)
 				}
 				craft = drawUpgrades(upgradeList,game,font,recipeImg,recipeBlack,itemList,pile,&scrolly, &canScroll,tinyResources,levels, &maxscroll, &clickable);
 				drawImage(close,game);
-				if(game->chain->mouse==1 && isClicked(&close->destPos,game,3))
+				if(game->chain->mouse==1 && isClicked(&close->destPos,game,4))
 				{
 					game->chain->mouse = 2;
 				}
@@ -1336,6 +1285,11 @@ int main(void)
 						desireMods += .25;	
 					}
 					
+					else if(craft==2)
+					{
+						flumfAuto += .1;	
+					}
+					
 					activatedUpgrades[craft-1] = 1;
 					craft=0;
 				}
@@ -1346,16 +1300,149 @@ int main(void)
 				}
 				setLayer(game,2);
 			}
+			else if(inMenu == 7)
+			{
+				redrawHouses = 1;
+				if(isClicked(&close->destPos,game,4))
+				{
+					if(game->chain->mouse==1)
+					{
+						inMenu = 0;
+						game->chain->mouse = 2;
+						redrawMenu = 1;
+					}
+					clickable = 1;
+				}
+				if (houseMove>0)
+				{
+					setLayer(game,1);
+					for(i=0;i<queue->size;i++)
+					{
+						if(queue->queue[i]->type == 1)
+						{
+							setToFrame(((House*)(queue->queue[i]->queued))->image,1,0);
+							drawImage(((House*)(queue->queue[i]->queued))->image,game);
+							setToFrame(((House*)(queue->queue[i]->queued))->image,0,0);
+						}
+					}
+					setLayer(game,2);
+					housex = game->chain->vx - movingHouse->image->w/6 -game->layerList[1]->scrollDest.x;
+					housey = background->h-119 + ((game->chain->vy-background->h+119-43-game->layerList[1]->scrollDest.y)/89)*89;
+					if(housex+movingHouse->image->w>=pile->image->x)
+					{
+						housex=pile->image->x-movingHouse->image->w;
+					}
+					else if(housex<0)
+					{
+						housex=0;
+					}
+					moveImageTo(movingHouse->image,housex,housey);
+					setLayer(game,1);
+					drawImage(movingHouse->image,game);
+					
+				
+					
+					setLayer(game,2);
+					
+					if(canPlace(houseList,houseNum,movingHouse,background->h))
+					{
+						
+						setToFrame(movingHouse->image,1,0);
+						
+						if(game->chain->mouse==1)
+						{
+							setToFrame(movingHouse->image,0,0);
+							game->chain->mouse = 2;
+							if(houseMove==1)
+							{
+								addHouseToQueue(queue,movingHouse,recipeList->list[craft-1],pile,itemList);
+								movingHouse->posX = housex;
+								movingHouse->posY = housey;
+								inMenu = 0;
+								for(i=0;i<5;i++)
+								{
+									levels[i]-=recipeList->list[craft-1]->levels[i];
+								}
+								if(movingHouse->type == 1)
+								{
+									unlockTier(2,recipeList);
+									unlockTier(3,recipeList);
+									recipeList->list[0]->unlocked = 0;
+									wonderModifier++;
+								}
+								if(movingHouse->type== 4)
+								{
+									specialization = 1;
+									lockTier(3,recipeList);
+								}
+								if(movingHouse->type== 5)
+								{
+									specialization = 2;
+									lockTier(3,recipeList);
+								}
+								if(movingHouse->type== 6)
+								{
+									specialization = 4;
+									lockTier(3,recipeList);
+								}
+								if(movingHouse->type== 9)
+								{
+									specialization = 3;
+									lockTier(3,recipeList);
+								}
+								if(movingHouse->type == 8)
+								{
+									recipeList->list[7]->unlocked = 0;
+									wonderModifier++;
+								}
+							}
+							else if (houseMove==2)
+							{
+								for(j=0;j<movingHouse->size;j++)
+								{
+									if(movingHouse->pals[j]->status == 0)
+									{
+										moveImageTo(houseList[i]->pals[j]->image,movingHouse->posX+movingHouse->image->w/2,houseList[i]->pals[j]->image->y);
+									}
+								}
+							}
+							movingHouse->posX = movingHouse->image->x;
+							movingHouse->posY = movingHouse->image->y;
+							houseMove = 0;
+						}
+					}
+					else
+					{
+						setToFrame(movingHouse->image,2,0);
+						if(game->chain->mouse==1)
+						{
+							game->chain->mouse = 2;
+							if(houseMove==2)
+							{
+								setToFrame(movingHouse->image,0,0);
+								moveImageTo(movingHouse->image,movingHouse->posX,movingHouse->posY);
+							}
+							houseMove = 0;
+						}
+						
+					}
+					
+				}
+				setLayer(game,4);
+				clearLayer(game);
+				drawImage(close,game);
+			}
 
 		}
 		if(!inMenu)
 		{
 			if(redrawMenu == 1)
 			{
-				setLayer(game,3);
+				setLayer(game,4);
 				clearLayer(game);
 				drawImage(adventureButton,game);
 				drawImage(statusButton,game);
+				drawImage(moveButton,game);
 				drawImage(craftButton,game);
 				drawImage(flumfButton,game);
 				if(hasUpgrade)
@@ -1378,11 +1465,27 @@ int main(void)
 			scrolly = 0;
 			canScroll = 0;
 		}
-		
-		setLayer(game,4);
+		else if(inMenu == 7)
+		{
+			setLayer(game,4);
+			if(game->layerList[0]->scrollDest.x < -scrollmin)
+					drawImage(leftArrow,game);
+			if(-game->layerList[0]->scrollDest.x < game->layerList[0]->scrollDest.w-game->boundingBox.w)
+				drawImage(rightArrow,game);
+			if(game->layerList[0]->scrollDest.y < 0)
+				drawImage(upArrow,game);
+			if(-game->layerList[0]->scrollDest.y < game->layerList[0]->scrollDest.h-game->boundingBox.h)
+				drawImage(downArrow,game);
+		}
+		setLayer(game,5);
 		clearLayer(game);
 		moveImageTo(cursor,game->chain->vx,game->chain->vy);
-		if(clickable)
+		if(attackable)
+		{
+			moveImage(cursor,-16,-22);
+			setToFrame(cursor,2,0);
+		}
+		else if(clickable)
 		{
 			setToFrame(cursor,1,0);
 		}
@@ -1391,6 +1494,10 @@ int main(void)
 			setToFrame(cursor,0,0);
 		}
 		drawImage(cursor,game);
+		if(attackable)
+		{
+			moveImage(cursor,16,22);
+		}
 		setLayer(game,2);
 		
 		if(errorTimer > 0)
@@ -1469,7 +1576,7 @@ int main(void)
 		if(game->chain->window)
 		{
 			resizeWindow(game);
-			game->layerList[3]= newLayer(game,game->boundingBox.w,game->boundingBox.h);
+			game->layerList[5]= newLayer(game,game->boundingBox.w,game->boundingBox.h);
 			redrawMenu=1;
 			moveImageTo(rightArrow,game->boundingBox.w-rightArrow->w,(game->boundingBox.h-rightArrow->h)/2);
 			moveImageTo(upArrow,game->boundingBox.w/2-upArrow->w/2,0);

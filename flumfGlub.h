@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -41,6 +42,20 @@ typedef struct UpgradeList
 	Upgrade ** list;
 	int size;
 } UpgradeList;
+
+typedef struct looseItem
+{
+	int type;
+	int errata;
+	Item * item;
+}looseItem;
+
+typedef struct looseItemList
+{
+	looseItem * list;
+	int size;
+	int capacity;
+} looseItemList;
 
 typedef struct PileItem
 {
@@ -135,7 +150,9 @@ typedef struct Adventurer
 	int moxie;
 	
 	int posTo;
-	
+	int posToX;
+	int posToY;
+
 	Clothing * hat;
 	Clothing * head;
 	Clothing * feet;
@@ -212,7 +229,7 @@ void giveAdventurerItem(Adventurer * pal, Item * item);
 void giveAdventurerNewItemByName(Adventurer * pal, char * itemName, ObjectList * list);
 void drawAdventurer(Adventurer * pal, Game * game);
 void drawAdventurerAtPoint(Adventurer * pal, Game * game,int x, int y);
-void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs,int moxieBonus, int scrollmin);
+void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs,int moxieBonus, int scrollmin, House ** houseList, int houseNum);
 House * newHouseByName(Game * game, int x, int y, char * name);
 House * newHouse(Game * game, int x, int y, int type);
 
@@ -249,7 +266,7 @@ void processItemQueue(Item * item, ProductionQueue * queue);
 House ** checkQueueHouse(ProductionQueue * queue, House ** houseList, int * houseNum);
 void checkQueueClothing(ProductionQueue * queue, ClothingRack * hatRack, ClothingRack * headRack, ClothingRack * feetRack);
 void removeFromQueue(ProductionQueue * queue,int i);
-void removeNextItemQueue(ProductionQueue * queue,Item * item);
+int removeNextItemQueue(ProductionQueue * queue,Item * item);
 void removeItemFromQueue(PQueue * queue,int i);
 char usefulstrcmp(char* input, char * match);
 Clothing * dupeClothing(Clothing * clothes);
@@ -282,7 +299,7 @@ void insertAllItems(ObjectList * items, Pile * list);
 void drawPile(Pile * pile, Game * game);
 void deleteItemsRecipe(Recipe * recipe, Pile * pile);
 void deletePileItem(PileItem * item);
-PileItem * drawPileDetailSub(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image * tinyResources,char plastic,char fabric,char metal,char nature, char tech,int * scrollMax, int* clickable, int * selection,Image *selectionMenu);
+PileItem * drawPileDetailSub(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image * tinyResources,char plastic,char fabric,char metal,char nature, char tech,int * scrollMax, int* clickable, int * selection,Image *selectionMenu,Image * ordering);
 PileItem * drawPileDetail(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image* tinyResources, int * scrollMax, int* clickable, int * sortandconsume,Image *selectionMenu,Image * ordering);
 void putInPile(Pile * pile,Item * item);
 Item * copyItem(Item * item);
@@ -300,9 +317,15 @@ int getStatHeight(int * levels, Image * tinyResources);
 char * houseFromType(int type);
 void drawBackgroundTile(Game * game, Image * tile);
 void unlockHouse(RecipeList * recipeList,char * name, char unlock);
+looseItemList * initLooseList();
+void addItemToLooseList(looseItemList * list, Item * item, int type,int errata);
+void removeItemFromLooseList(looseItemList * list, Item * item);
+void removeQueuedLooseItems(looseItemList * list,int id);
+Item * grabItemFromLoose(looseItemList * list, int pos);
+int looseItemGrabbable(looseItemList * list);
+
 //needs work
-
+int canAmbulate(House** houseList, int houseNum,int x, int y, int xTo, int yTo,int looseX);
 //to-do
-
 
 #endif
