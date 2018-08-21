@@ -1,4 +1,9 @@
-Cybernetic Legs,Give your pals some cool robo-legs to run faster,1,needle,2,%levels,0,0,1000,0,1000
+Cybernetic Legs,Give your pals some cool robo-legs to run faster,1,needle,3,spool,1,%levels,0,0,1000,0,1000
 HungryFlumf goodmeal,Increase the cravings level of your glorious Flumf,1,loaf,1,bread,1,tin-can,1,%levels,0,0,0,1000,0
 Automagic Whistle,Have some of your pals wander around collecting while you relax,1,bell,1,whistle,2,egg,1,%levels,0,0,0,1000,1000
-Cybernetic Arms,Give your pals some cool robo-arms to lift more,1,needle,2,%levels,0,0,1000,0,1000
+Cybernetic Arms,Give your pals some cool robo-arms to lift more,1,needle,1,fork,1,spool,1,%levels,0,0,1000,0,1000
+Cybernetic Eyes,Nothing scary about replacing the eyes of your pals-they love it,1,needle,1,button,2,spool,1,%levels,0,0,1000,0,1000
+Broad Horizons,The gaze of the flumf broadens evermore extending the range of control,1,glass,1,painting,1,earbud,2,%levels,200,200,200,200,200
+Fertigrow,Help your plants grow faster through the grace of science,3,glue,1,orange,1,pizza,1,sock,1,%levels,0,0,0,2000,0
+HarvestBot,A friendly little robot that automatically harvests plants,3,gear,2,holiday-light,2,plastic-brick,4,fork,2,battery,1,%levels,0,0,0,5000,5000
+ReplantoBot,HarvestBot has learned how to replant a plant automatically-congrats to them,3,loaf,1,virtual-pet,1,scissors,1,battery,1,%levels,0,0,0,10000,10000

@@ -102,4 +102,6 @@ void swapLayers(Game * game, int layer1, int layer2);
 void resizeWindow(Game * game);
 Layer * newLayer(Game * game, int width, int height);
 void freeImage(Image * image);
+void animateRangeSpeed(Image * image, int min, int max, int speed);
+void rotateImage(Image * image,int r);
 #endif

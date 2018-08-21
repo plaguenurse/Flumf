@@ -24,6 +24,36 @@ typedef struct Item
 	int technology;
 } Item;
 
+typedef struct FlyingItem
+{
+	Image * image;
+	int startX;
+	int startY;
+	int endX;
+	int endY;
+	int delay;
+	struct FlyingItem * next;
+}FlyingItem;
+
+typedef struct AmbulationPlatform
+{
+	int min, max;
+	struct AmbulationPlatform * next;
+}AmbulationPlatform;
+
+typedef struct AmbulationTowerList
+{
+	AmbulationPlatform** tiers;
+}AmbulationTowerList;
+
+typedef struct Effect
+{
+	Image * image;
+	int timer;
+	int microtimer;
+	struct Effect * next;
+}Effect;
+
 typedef struct Upgrade
 {
 	char * name;
@@ -152,6 +182,9 @@ typedef struct Adventurer
 	int posTo;
 	int posToX;
 	int posToY;
+	int posToXnext;
+	int posToYnext;
+	int advancedMove;
 
 	Clothing * hat;
 	Clothing * head;
@@ -170,6 +203,8 @@ typedef struct Enemy
 	int timer;
 	int delay;
 	int speed;
+	int posToX;
+	int posToY;
 	short int dir;
 	int negpos;
 	int health;
@@ -229,7 +264,7 @@ void giveAdventurerItem(Adventurer * pal, Item * item);
 void giveAdventurerNewItemByName(Adventurer * pal, char * itemName, ObjectList * list);
 void drawAdventurer(Adventurer * pal, Game * game);
 void drawAdventurerAtPoint(Adventurer * pal, Game * game,int x, int y);
-void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs,int moxieBonus, int scrollmin, House ** houseList, int houseNum);
+void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs, int moxieBonus, int scrollmin,AmbulationTowerList * ambulationList);
 House * newHouseByName(Game * game, int x, int y, char * name);
 House * newHouse(Game * game, int x, int y, int type);
 
@@ -247,7 +282,7 @@ void addPaltoHouse(House * house, Adventurer * pal, Game * game);
 void drawImagePyramid(Image * image, Game * game , int amount, int midx, int y,int maxwidth);
 int getIndexPointforgrabby(ObjectList * list, int tier, int chutzpah);
 Item * getItemGroup(ObjectList * list, int tier, int chutzpahPool);
-void drawFeedBackground(Game * game, Image * bkgrnd, Image * flumf, Image * menuleft, int anim);
+void drawFeedBackground(Game * game, Image * bkgrnd, Image * flumf, Image * menuleft, int anim,int delay);
 int dirtyTwoExponent(int power);
 int dirtyLogTwo(int value);
 int generateRandomLogVal(int maxVal);
@@ -276,10 +311,10 @@ void drawLevels(int* levels, Image * levelBar, Game * game, Image * background, 
 int drawStatsItem(Item * item,int x, int y,Game * game,Font * font,Image* tinyResources, int maxWidth);
 int drawStats(int * levels,int x, int y,Game * game,Font * font,Image* tinyResources, int maxWidth);
 int getStatWidth(int * levels,int x, int y,Game * game,Font * font,Image* tinyResources, int maxWidth);
-Item * dupeItem(Item * item);
+Item * dupeItem(Item * item, ObjectList * list);
 void drawStatusBar(int amount, int total, int width, int height, int x, int y,char dir,Game * game);
 Enemy * newEnemy(int type, Game * game);
-void enemyDo(Enemy * foe, Game * game, ObjectList * list, int x, int y, char * redraw, int* eggs);
+void enemyDo(Enemy * foe, Game * game, ObjectList * list, int x, int y, char * redraw, int* eggs,AmbulationTowerList * ambulationList);
 void clearEnemy(Enemy* enemy);
 void drawEnemy(Enemy * foe, Game * game);
 void moveEnemy(Enemy * foe, int x, int y);
@@ -323,9 +358,21 @@ void removeItemFromLooseList(looseItemList * list, Item * item);
 void removeQueuedLooseItems(looseItemList * list,int id);
 Item * grabItemFromLoose(looseItemList * list, int pos);
 int looseItemGrabbable(looseItemList * list);
-
+AmbulationTowerList * createAmbulationList(House ** houseList, int houseNum);
+void insertAmbulationPlatform(AmbulationTowerList * list, int level, int min, int max);
+AmbulationPlatform * recurseInsertAmbulationPlatform(AmbulationPlatform * curr, int level, int min, int max);
+void postAmbulationInsertionRecalibration(AmbulationTowerList * list, int level);
+int canAmbulate(AmbulationTowerList * list,int x, int y, int xTo, int yTo);
+int canTraverseToLevel(AmbulationTowerList * list, int levelTo, int currLevel, int xTo, int x, int min, int max);
+Effect * newEffect(Effect * list,Image * image,int posX, int posY, int length);
+Effect * processEffects(Effect * first,Game * game);
+Effect * clearTimeredEffects(Effect * effect);
+FlyingItem * newFlyingItem(FlyingItem * list,Image * image,int startX, int startY,int endX, int endY, int delay);
+FlyingItem * processFlyingItems(FlyingItem * first,Game * game);
+FlyingItem * clearFlyingItems(FlyingItem * item);
 //needs work
-int canAmbulate(House** houseList, int houseNum,int x, int y, int xTo, int yTo,int looseX);
 //to-do
+
+
 
 #endif

@@ -609,35 +609,71 @@ void drawPile(Pile * pile, Game * game)
 	PileItem * traverse = pile->firstSize;
 	while(traverse!=NULL)
 	{
-		for(i=0;i<traverse->size;i++)
+		if(traverse->size>15)
 		{
-			if(baseHeight > game->boundingBox.h*1.5)
+			for(i=0;i<15;i++)
 			{
-				baseHeight = 0;
-			}
-			if((size + traverse->item->image->w )> w)
-			{
-				moveImageTo(traverse->item->image,x + w-traverse->item->image->w, y + h -traverse->item->image->h - baseHeight);
-			
-				if(minHeight > (traverse->item->image->h*9)/10)
-					minHeight = (traverse->item->image->h*9)/10;
-				else if(minHeight == 0)
-					minHeight = (traverse->item->image->h*9)/10;
-				size = 0;
-				baseHeight += minHeight;
-			}
-			else
-			{
-				moveImageTo(traverse->item->image,x + size, y + h -traverse->item->image->h - baseHeight);
+				if(baseHeight > game->boundingBox.h*1.5)
+				{
+					baseHeight = 0;
+				}
+				if((size + traverse->item->image->w )> w)
+				{
+					moveImageTo(traverse->item->image,x + w-traverse->item->image->w, y + h -traverse->item->image->h - baseHeight);
 				
-				size += (traverse->item->image->w*9)/10;
-				
-				if(minHeight > (traverse->item->image->h*9)/10)
-					minHeight = (traverse->item->image->h*9)/10;
-				else if(minHeight == 0)
-					minHeight = (traverse->item->image->h*9)/10;
+					if(minHeight > (traverse->item->image->h*9)/10)
+						minHeight = (traverse->item->image->h*9)/10;
+					else if(minHeight == 0)
+						minHeight = (traverse->item->image->h*9)/10;
+					size = 0;
+					baseHeight += minHeight;
+				}
+				else
+				{
+					moveImageTo(traverse->item->image,x + size, y + h -traverse->item->image->h - baseHeight);
+					
+					size += (traverse->item->image->w*9)/10;
+					
+					if(minHeight > (traverse->item->image->h*9)/10)
+						minHeight = (traverse->item->image->h*9)/10;
+					else if(minHeight == 0)
+						minHeight = (traverse->item->image->h*9)/10;
+				}
+				drawImage(traverse->item->image,game);
 			}
-			drawImage(traverse->item->image,game);
+		}
+		else 
+		{
+			for(i=0;i<traverse->size;i++)
+			{
+				if(baseHeight > game->boundingBox.h*1.5)
+				{
+					baseHeight = 0;
+				}
+				if((size + traverse->item->image->w )> w)
+				{
+					moveImageTo(traverse->item->image,x + w-traverse->item->image->w, y + h -traverse->item->image->h - baseHeight);
+				
+					if(minHeight > (traverse->item->image->h*9)/10)
+						minHeight = (traverse->item->image->h*9)/10;
+					else if(minHeight == 0)
+						minHeight = (traverse->item->image->h*9)/10;
+					size = 0;
+					baseHeight += minHeight;
+				}
+				else
+				{
+					moveImageTo(traverse->item->image,x + size, y + h -traverse->item->image->h - baseHeight);
+					
+					size += (traverse->item->image->w*9)/10;
+					
+					if(minHeight > (traverse->item->image->h*9)/10)
+						minHeight = (traverse->item->image->h*9)/10;
+					else if(minHeight == 0)
+						minHeight = (traverse->item->image->h*9)/10;
+				}
+				drawImage(traverse->item->image,game);
+			}
 		}
 		traverse = traverse->nextSize;
 	}
@@ -646,11 +682,6 @@ void drawPile(Pile * pile, Game * game)
 
 int isClicked(SDL_Rect * box, Game * game, int layer)
 {
-	//
-	//
-	//needs to be revised
-	//
-	//
 	int x = game->chain->x*(game->boundingBox.h*1.0/game->chain->winheight);
 	int y = game->chain->y*(game->boundingBox.h*1.0/game->chain->winheight);
 		
@@ -680,13 +711,13 @@ Adventurer * newAdventurer(int type, Game * game)
 	pal->moxie = rand()%3 + 1;
 	pal->burdenedmoxie = pal->moxie;
 	pal->chutzpah = 50 + rand() % 35;
-	pal->wonder = 1 + (rand()%100>=90);
+	pal->wonder = 1 + (rand()%100>=80);
 	
 	pal->hat= NULL;
 	pal->head= NULL;
 	pal->feet= NULL;
-	
-	pal->image = loadImage("images/pals/1.png",7,2,game);	
+	pal->advancedMove = 0;
+	pal->image = loadImage("images/pals/1.png",8,3,game);	
 	pal->status = 0;
 
 	pal->type = type;
@@ -752,8 +783,11 @@ void drawAdventurerAtPoint(Adventurer * pal, Game * game,int x, int y)
 
 void moveAdventurer(Adventurer * pal, int x, int y)
 {
-
-	if(pal->dir==-1 && x>0)
+	if(y!=0)
+	{
+		
+	}
+	else if(pal->dir==-1 && x>0)
 	{
 		setToFrame(pal->image,0,0);
 		if(pal->hat!=NULL)
@@ -787,38 +821,19 @@ void moveAdventurer(Adventurer * pal, int x, int y)
 		}		
 		pal->dir = -1;
 	}
-
-	if(pal->dir == 1)
+	
+	if(y!=0)
 	{
-		animateRange(pal->image,0,6);
-		if(pal->hat!=NULL)
-		{
-			animateRange(pal->hat->image,0,6);
-		}
-		if(pal->head!=NULL)
-		{
-			animateRange(pal->head->image,0,6);
-		}
-		if(pal->feet!=NULL)
-		{
-			animateRange(pal->feet->image,0,6);
-		}
+		animateRange(pal->image,16,23);
+	}
+	else if(pal->dir == 1)
+	{
+		animateRange(pal->image,0,7);
 	}
 	else
 	{
-		animateRange(pal->image,7,13);
-		if(pal->hat!=NULL)
-		{
-			animateRange(pal->hat->image,7,13);
-		}
-		if(pal->head!=NULL)
-		{
-			animateRange(pal->head->image,7,13);
-		}
-		if(pal->feet!=NULL)
-		{
-			animateRange(pal->feet->image,7,13);
-		}
+		animateRange(pal->image,8,15);
+		
 	}
 	moveImage(pal->image,x,y);
 	
@@ -826,21 +841,10 @@ void moveAdventurer(Adventurer * pal, int x, int y)
 	{
 		moveImage(pal->item->image,x,y);
 	}
-	if(pal->hat!=NULL)
-	{
-		moveImage(pal->hat->image,x,y);
-	}
-	if(pal->head!=NULL)
-	{
-		moveImage(pal->head->image,x,y);
-	}
-	if(pal->feet!=NULL)
-	{
-		moveImage(pal->feet->image,x,y);
-	}
+	
 }
 
-void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs, int moxieBonus, int scrollmin, House ** houseList, int houseNum)
+void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs, int moxieBonus, int scrollmin,AmbulationTowerList * ambulationList)
 {
 	int ambulation = 0;
 	if(pal->type ==1)
@@ -850,7 +854,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 		{
 			if(pal->delay == 0)
 			{
-				ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
+				ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY);
 				if(ambulation !=0)
 				{
 					if(ambulation == 2)
@@ -864,7 +868,280 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 					drawAdventurer(pal,game);
 				}
 				else
-					moveAdventurer(pal,-getMoxie(pal,moxieBonus),0);
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
+					drawAdventurer(pal,game);
+				}
+			}
+			else
+			{
+				pal->delay--;
+			}
+		}
+		else if (pal->status == 2)
+		{
+			ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY);
+			if(ambulation !=0)
+			{
+				if(ambulation == 2)
+				{
+					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+				}
+				else
+				{
+					moveAdventurer(pal,pal->burdenedmoxie*ambulation,0);
+				}
+				
+			}
+			else
+			{
+				moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
+				drawAdventurer(pal,game);
+			}
+			drawAdventurer(pal,game);
+		}
+		else if (pal->status == 3)
+		{
+			if(pal->advancedMove !=0)
+			{
+				ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->image->x,640-30-pal->image->h);
+				if ((abs(pal->image->y-640+30+pal->image->h)<3 || (abs(pal->image->y-pal->posToY)<3)) && canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY)!=0)
+				{
+					pal->advancedMove = 0;
+					drawAdventurer(pal,game);
+				}
+				else if (ambulation !=0)
+				{
+					if(ambulation == 2)
+					{
+						moveAdventurer(pal,0,(pal->image->y<640-30-pal->image->h)?3:-3);
+					}
+					else
+					{
+						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					}
+					drawAdventurer(pal,game);
+				}
+				else
+				{
+					moveAdventurer(pal,0,(pal->image->y<640-30-pal->image->h)?3:-3);
+					drawAdventurer(pal,game);
+				}
+				
+			}
+			else
+			{
+				ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY);
+
+				if(pal->item != NULL)
+					pal->item = NULL;
+				if(ambulation !=0)
+				{
+					if(ambulation == 2)
+					{
+						moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+					}
+					else
+					{
+						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					}
+					drawAdventurer(pal,game);
+				}
+				else if(abs(pal->image->x-pal->posToX)<getMoxie(pal,moxieBonus)+20)
+				{
+					pal->status = 0;
+					(*currOutPals)--;
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
+					drawAdventurer(pal,game);
+				}
+			}
+		}
+		else if (pal->status == 4)
+		{
+			ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY);
+
+			
+			if(pal->delay == 0)
+			{
+				if(ambulation !=0)
+				{
+					if(ambulation == 2)
+					{
+						moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+					}
+					else
+					{
+						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					}
+					drawAdventurer(pal,game);
+				}
+				else if(pal->image->x+20 >= pal->posToX)
+				{
+					pal->status = 5;
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
+					drawAdventurer(pal,game);
+				}
+	
+			}
+			else
+			{
+				pal->delay--;
+			}
+			
+		}
+		else if (pal->status == 5)
+		{
+			if(pal->item!=NULL)
+			{
+				
+				ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY);
+				
+				if(ambulation !=0)
+				{
+					if(ambulation == 2)
+					{
+						moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+					}
+					else
+					{
+						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					}
+					drawAdventurer(pal,game);
+				}
+				else if(abs(pal->image->x-pal->posToX)<getMoxie(pal,moxieBonus)+20)
+				{
+					pal->status = 6;
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
+					drawAdventurer(pal,game);
+				}
+			}
+		}
+		else if (pal->status==7)
+		{
+			if(pal->delay == 0)
+			{
+				ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY);
+
+				if(ambulation !=0)
+				{
+					if(ambulation == 2)
+					{
+						moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+					}
+					else
+					{
+						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					}
+				
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
+					drawAdventurer(pal,game);
+				}
+				drawAdventurer(pal,game);
+			}
+			else
+			{
+				pal->delay--;
+			}
+			if(pal->image->x+20 >=pal->posToX)
+			{
+				(*eggs)--;
+				*redraw = 1;
+				pal->status = 18;
+			}
+		}
+		else if(pal->status==8)
+		{
+			ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY);
+			if(ambulation !=0)
+			{
+				if(ambulation == 2)
+				{
+					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+				}
+				drawAdventurer(pal,game);
+			}
+			else 
+			{
+				if(abs(pal->image->x-pal->posToX)<getMoxie(pal,moxieBonus)+20)
+				{
+					pal->status = 9;
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
+					drawAdventurer(pal,game);
+				}
+			}
+		}
+		else if(pal->status==10)
+		{
+			ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY);
+
+			if(ambulation !=0)
+			{
+				if(ambulation == 2)
+				{
+					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+				}
+				drawAdventurer(pal,game);
+			}
+			else
+			{
+				moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
+				drawAdventurer(pal,game);
+			
+				if(abs(pal->image->x-pal->posToX)<getMoxie(pal,moxieBonus))
+				{
+					pal->status = 11;
+					pal->burdenedmoxie = getMoxie(pal,moxieBonus);
+				}
+			}
+		}
+	}
+	else if(pal->type == 2)
+	{
+		if (pal->status == 1  && pal->image->x >= -pal->image->w*4)
+		{
+			if(pal->delay == 0)
+			{
+				ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY);
+				if(ambulation !=0)
+				{
+					if(ambulation == 2)
+					{
+						moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+					}
+					else
+					{
+						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					}
+					drawAdventurer(pal,game);
+				}
+				else
+				{
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
+					drawAdventurer(pal,game);
+				}
 				drawAdventurer(pal,game);
 			}
 			else
@@ -874,89 +1151,45 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 		}
 		else if (pal->status == 2)
 		{
-			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
-
-			if(ambulation !=0)
+			if(pal->advancedMove !=0)
 			{
-				if(ambulation == 2)
+				ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->image->x,640-30-pal->image->h);
+				if ((abs(pal->image->y-640+30+pal->image->h)<3 || (abs(pal->image->y-pal->posToY)<3)) && canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY)!=0)
 				{
-					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
+					pal->advancedMove = 0;
+					drawAdventurer(pal,game);
+				}
+				else if (ambulation !=0)
+				{
+					if(ambulation == 2)
+					{
+						moveAdventurer(pal,0,(pal->image->y<640-30-pal->image->h)?3:-3);
+					}
+					else
+					{
+						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					}
+					drawAdventurer(pal,game);
 				}
 				else
 				{
-					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
+					moveAdventurer(pal,0,(pal->image->y<640-30-pal->image->h)?3:-3);
+					drawAdventurer(pal,game);
 				}
-				drawAdventurer(pal,game);
-			}
-			else
-				moveAdventurer(pal,pal->burdenedmoxie,0);
-			drawAdventurer(pal,game);
-		}
-		else if (pal->status == 3)
-		{
-			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,0);
-			if(pal->item != NULL)
-				pal->item = NULL;
-			if(ambulation !=0)
-			{
-				if(ambulation == 2)
-				{
-					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
-				}
-				else
-				{
-					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
-				}
-				drawAdventurer(pal,game);
-			}
-			else if(abs(pal->image->x-x)<getMoxie(pal,moxieBonus))
-			{
-				pal->status = 0;
-				(*currOutPals)--;
-			}
-			else
-			{
-				moveAdventurer(pal,(pal->image->x>x)?-getMoxie(pal,moxieBonus):getMoxie(pal,moxieBonus),0);
-				drawAdventurer(pal,game);
-			}
-		}
-		else if (pal->status == 4)
-		{
-			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
-
-			if(ambulation !=0)
-			{
-				if(ambulation == 2)
-				{
-					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
-				}
-				else
-				{
-					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
-				}
-				drawAdventurer(pal,game);
-			}
-			else if(pal->delay == 0)
-			{
 				
-				moveAdventurer(pal,getMoxie(pal,moxieBonus),0);
-				drawAdventurer(pal,game);
 			}
 			else
 			{
-				pal->delay--;
-			}
-			
-			if(pal->image->x > 512+2048)
-				pal->status = 5;
-		}
-		else if (pal->status == 5)
-		{
-			if(pal->item!=NULL)
-			{
-				ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
+				ambulation =canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY);
 
-				if(ambulation !=0)
+				if(pal->item != NULL)
+					pal->item = NULL;
+				if(abs(pal->image->y-pal->posToY)<5 && abs(pal->image->x-pal->posToX)<22)
+				{
+					pal->status = 0;
+					(*currOutPals)--;
+				}
+				else if(ambulation !=0)
 				{
 					if(ambulation == 2)
 					{
@@ -968,129 +1201,10 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 					}
 					drawAdventurer(pal,game);
 				}
-				else if(abs(pal->image->x-pal->posTo)<getMoxie(pal,moxieBonus))
-				{
-					pal->status = 6;
-				}
 				else
 				{
-					moveAdventurer(pal,(pal->image->x>pal->posTo)?-getMoxie(pal,moxieBonus):getMoxie(pal,moxieBonus),0);
-				}
-			}
-			drawAdventurer(pal,game);
-		}
-		else if (pal->status == 6)
-		{
-			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
-
-			if(ambulation !=0)
-			{
-				if(ambulation == 2)
-				{
-					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
-				}
-				else
-				{
-					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
-				}
-				drawAdventurer(pal,game);
-			}
-			else if(abs(pal->image->x-x)<getMoxie(pal,moxieBonus))
-			{
-				pal->status = 0;
-				(*currOutPals)--;
-			}
-			else
-			{
-				moveAdventurer(pal,(pal->image->x>x)?-getMoxie(pal,moxieBonus):getMoxie(pal,moxieBonus),0);
-				drawAdventurer(pal,game);
-			}
-		}
-		else if (pal->status==7)
-		{
-			if(pal->delay == 0)
-			{
-				ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
-
-				if(ambulation !=0)
-				{
-					if(ambulation == 2)
-					{
-						moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
-					}
-					else
-					{
-						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
-					}
+					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
 					drawAdventurer(pal,game);
-				}
-				else 
-				{
-					moveAdventurer(pal,getMoxie(pal,moxieBonus),0);
-					drawAdventurer(pal,game);
-				}
-			}
-			else
-			{
-				pal->delay--;
-			}
-			if(pal->image->x > 765+2048)
-			{
-				(*eggs)--;
-				*redraw = 1;
-				pal->status = 8;
-			}
-		}
-		else if(pal->status==8)
-		{
-			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
-
-			if(ambulation !=0)
-			{
-				if(ambulation == 2)
-				{
-					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
-				}
-				else
-				{
-					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
-				}
-				drawAdventurer(pal,game);
-			}
-			else 
-			{
-				moveAdventurer(pal,(pal->image->x>x)?-getMoxie(pal,moxieBonus):getMoxie(pal,moxieBonus),0);
-				drawAdventurer(pal,game);
-				if(abs(pal->image->x-x)<getMoxie(pal,moxieBonus))
-				{
-					pal->status = 9;
-				}
-			}
-		}
-		else if(pal->status==10)
-		{
-			ambulation =canAmbulate(houseList,houseNum,pal->image->x, pal->image->y, pal->posToX,pal->posToY,1);
-
-			if(ambulation !=0)
-			{
-				if(ambulation == 2)
-				{
-					moveAdventurer(pal,0,(pal->image->y<pal->posToY)?3:-3);
-				}
-				else
-				{
-					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
-				}
-				drawAdventurer(pal,game);
-			}
-			else 
-			{
-				moveAdventurer(pal,(pal->image->x>pal->posToX)?-getMoxie(pal,moxieBonus):getMoxie(pal,moxieBonus),0);
-				drawAdventurer(pal,game);
-				if(abs(pal->image->x-pal->posToX)<getMoxie(pal,moxieBonus))
-				{
-					pal->status = 11;
-					pal->burdenedmoxie = getMoxie(pal,moxieBonus);
 				}
 			}
 		}
@@ -1174,6 +1288,14 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->pals = NULL;
 		house->type = 9;
 	}
+	else if(strcmp(name,"Attack_Tower")==0)
+	{
+		house->image = loadImage("images/buildings/attack.png",3,1,game);
+		house->capacity = 0;
+		house->size = 0;
+		house->pals = NULL;
+		house->type = 10;
+	}
 	moveImageTo(house->image,x,y);
 	house->status = 0;
 	house->pending = 0;
@@ -1248,6 +1370,13 @@ House * newHouse(Game * game, int x, int y, int type)
 		house->size = 0;
 		house->pals = NULL;
 	}
+	else if(type == 10)
+	{
+		house->image = loadImage("images/buildings/attack.png",3,1,game);
+		house->capacity = 0;
+		house->size = 0;
+		house->pals = NULL;
+	}
 	moveImageTo(house->image,x,y);
 	house->type = type;
 	house->status = 0;
@@ -1294,6 +1423,11 @@ char * houseFromType(int type)
 	else if(type == 9)
 	{
 		return "Mine";
+		
+	}
+	else if(type == 10)
+	{
+		return "Attack_Tower";
 		
 	}
 	return NULL;
@@ -1638,28 +1772,21 @@ PileItem * drawPileDetail(Pile * pile, Game * game, Font * font, int * offsety, 
 			rect.h = curr->item->image->h;
 			rect.x+=4*(curr->size);
 			scrollhold = rect.y;
-			for(i = 0;i<curr->size;i++)
+			for(i = 0;i<curr->size && rect.x>=30;i++)
 			{
 				doubletemp = rect.x;
-				while(rect.x>130)
+				if(rect.x>130)
 				{
-					rect.y+=6;
-					rect.x-=104;
+					rect.x=130;
 				}
 				SDL_RenderCopy(game->renderer,curr->item->image->image,&curr->item->image->srcPos,&rect);
 				rect.x = doubletemp;
 				rect.x-=4;
 				rect.y = scrollhold;
 			}
-			if(4*(curr->size)>130)
-			{
-				rect.w+=130-rect.x;
-				rect.h+=6*(4*curr->size/130+1);
-			}
-			else 
-			{
-				rect.w+=4*(curr->size);
-			}
+
+			rect.w=130;
+
 			if(isClicked(&rect,game,game->currLayer))
 			{
 				if (forge)
@@ -1672,10 +1799,9 @@ PileItem * drawPileDetail(Pile * pile, Game * game, Font * font, int * offsety, 
 				*clickable = 1;
 			}
 			
-			rect.w-=4*curr->size;
-			rect.x+=4*curr->size;
 			
-			rect.y += curr->item->image->h+5;
+			rect.x=30;
+			rect.y += curr->item->image->h+11;
 			
 		}
 	
@@ -1908,37 +2034,39 @@ void drawBackgroundTile(Game * game, Image * tile)
 	}	
 }
 
-void drawFeedBackground(Game * game, Image * bkgrnd, Image * flumf, Image * menuleft, int anim)
+void drawFeedBackground(Game * game, Image * bkgrnd, Image * flumf, Image * menuleft, int anim,int delay)
 {
 	int i = 0, j = 0;
 	SDL_Rect temprect;
-	temprect.x = 0;
-	temprect.y = 0;
-	temprect.w = bkgrnd->w;
-	temprect.h = bkgrnd->h;
-	for(i=0;i<game->boundingBox.w;i+= bkgrnd->w)
-	{
-		for(j=0;j<game->boundingBox.h;j+= bkgrnd->h)
+	
+		temprect.x = 0;
+		temprect.y = 0;
+		temprect.w = bkgrnd->w;
+		temprect.h = bkgrnd->h;
+		for(i=0;i<game->boundingBox.w;i+= bkgrnd->w)
 		{
-			SDL_RenderCopy(game->renderer,bkgrnd->image,&bkgrnd->srcPos,&temprect);
-			temprect.y+=bkgrnd->h;
+			for(j=0;j<game->boundingBox.h;j+= bkgrnd->h)
+			{
+				SDL_RenderCopy(game->renderer,bkgrnd->image,&bkgrnd->srcPos,&temprect);
+				temprect.y+=bkgrnd->h;
+			}
+			temprect.x+=bkgrnd->w;
+			temprect.y=0;
 		}
-		temprect.x+=bkgrnd->w;
-		temprect.y=0;
-	}
 
-	if(anim > 0)
-	{
-		animateRange(flumf,1,6);
-	}
-	else
-	{
-		setToFrame(flumf,0,0);
-	}
-	moveImageTo(flumf,game->boundingBox.w - flumf->w,game->boundingBox.h - flumf->h);
-	moveImageTo(menuleft,0,0);
-	SDL_RenderCopy(game->renderer,flumf->image,&flumf->srcPos,&flumf->destPos);
-	SDL_RenderCopy(game->renderer,menuleft->image,&menuleft->srcPos,&menuleft->destPos);
+		if(anim > 0 && delay==0)
+		{
+			animateRange(flumf,1,6);
+		}
+		else
+		{
+			setToFrame(flumf,0,0);
+		}
+		moveImageTo(flumf,game->boundingBox.w - flumf->w,game->boundingBox.h - flumf->h);
+		moveImageTo(menuleft,0,0);
+		SDL_RenderCopy(game->renderer,flumf->image,&flumf->srcPos,&flumf->destPos);
+		SDL_RenderCopy(game->renderer,menuleft->image,&menuleft->srcPos,&menuleft->destPos);
+	
 }
 
 
@@ -2213,8 +2341,10 @@ Clothing * dupeClothing(Clothing * clothes)
 	return newClothes;
 }
 
-Item * dupeItem(Item * item)
+Item * dupeItem(Item * item, ObjectList * list)
 {
+	return getItemByName(item->name,list);
+	/*
 	Item * itemRet = malloc(sizeof(Item));
 	itemRet->image = imageCopy(item->image);
 	itemRet->name = malloc(sizeof(char)*(strlen(item->name)+1));
@@ -2226,7 +2356,7 @@ Item * dupeItem(Item * item)
 	itemRet->nature = item->nature;
 	itemRet->plastic = item->plastic;
 	itemRet->technology = item->technology;
-	return itemRet;
+	return itemRet;*/
 }
 
 void addClothingToQueue(ProductionQueue * queue, Clothing ** clothes,Recipe * recipe, Pile * pile, ObjectList * list, int clotheNum)
@@ -2359,7 +2489,10 @@ void drawStatusBar(int amount, int total, int width, int height, int x, int y,ch
 int canPlace(House ** houseList, int houseNum,House * movingHouse, int mapHeight)
 {
 	int i = 0,place = 0;
-	
+	if (movingHouse->image->y < 0)
+	{
+		return 0;
+	}
 	for(i=0;i<houseNum;i++)
 	{
 		if(houseList[i]!=movingHouse)
@@ -2411,8 +2544,9 @@ int canRemove(House ** houseList, int houseNum,House * movingHouse)
 	return place;
 }
 
-void enemyDo(Enemy * foe, Game * game, ObjectList * list, int x, int y, char * redraw, int* eggs)
+void enemyDo(Enemy * foe, Game * game, ObjectList * list, int x, int y, char * redraw, int* eggs,AmbulationTowerList * ambulationList)
 {
+	int ambulation;
 	if(foe->type ==1)
 	{
 		if (foe->status == 1)
@@ -2432,6 +2566,24 @@ void enemyDo(Enemy * foe, Game * game, ObjectList * list, int x, int y, char * r
 			moveEnemy(foe,-foe->speed,0);
 			drawEnemy(foe,game);
 		}
+	}
+	else if(foe->type ==2)
+	{
+		ambulation =canAmbulate(ambulationList,foe->image->x, foe->image->y, foe->posToX,foe->posToY);
+		if(ambulation !=0)
+		{
+			if(ambulation == 2)
+			{
+				moveEnemy(foe,0,(foe->image->y<foe->posToY)?3:-3);
+			}
+			else
+			{
+				moveEnemy(foe,foe->speed*ambulation,0);
+			}
+			
+			
+		}
+		drawEnemy(foe,game);
 	}
 }
 void drawEnemy(Enemy * foe, Game * game)
@@ -2462,11 +2614,11 @@ void moveEnemy(Enemy * foe, int x, int y)
 
 	if(foe->dir == 1)
 	{
-		animateRange(foe->image,0,6);
+		animateRange(foe->image,0,7);
 	}
 	else
 	{
-		animateRange(foe->image,7,13);
+		animateRange(foe->image,8,15);
 	}
 	moveImage(foe->image,x,y);
 	
@@ -2485,11 +2637,20 @@ Enemy * newEnemy(int type, Game * game)
 	foe->delay = 0;
 	foe->negpos = 0;
 	foe->posTo = 0;
-	
-	foe->speed = 1;
-	foe->health = (rand()%3)*10 + 30;
-	foe->image = loadImage("images/enemies/1.png",7,2,game);	
-	foe->status = 0;
+	if(type == 1)
+	{
+		foe->speed = 2;
+		foe->health = (rand()%7)*10 + 30;
+		foe->image = loadImage("images/enemies/1.png",8,2,game);	
+		foe->status = 0;
+	}
+	else if(type == 2)
+	{
+		foe->speed = 1;
+		foe->health = (rand()%7)*10 + 100;
+		foe->image = loadImage("images/enemies/2.png",8,3,game);	
+		foe->status = 0;
+	}
 	
 	foe->type = type;
 	foe->item = NULL;
@@ -3193,224 +3354,309 @@ int looseItemGrabbable(looseItemList * list)
 	}
 	return -1;
 }
-int canAmbulate(House** houseList, int houseNum,int x, int y, int xTo, int yTo,int looseX)
+int canAmbulate(AmbulationTowerList * list,int x, int y, int xTo, int yTo)
 {
-	int i;
-	int dir = -1;
-	int index = -1;
-	int loop = 1;
-	int loose = 0;
-	int firstIndex = -1;
-	if (y<yTo)
+	int ambulation = 0;
+
+	ambulation = canTraverseToLevel(list,(640-yTo-30)/(640/7),(640-y-30)/(640/7),xTo,x,0,3072);
+	
+	if((640-y-30)/(640/7)!=(640-yTo-30)/(640/7))
 	{
-		dir =1;
+		return ambulation;
 	}
 	else
 	{
-		dir = -1;
+		if(abs(y-yTo)<4)
+		{
+			if (ambulation == 2)
+				return 0;
+			else
+				return ambulation;
+		}
+		else return 2;
 	}
-	if(abs(y-yTo)<3)
+}
+AmbulationTowerList * createAmbulationList(House ** houseList, int houseNum)
+{
+	AmbulationTowerList * list = malloc(sizeof(AmbulationTowerList));
+	list->tiers = malloc(sizeof(AmbulationPlatform*)*7);
+	int i;
+	int mapHeight = 640;
+	for(i=0;i<7;i++)
 	{
-		return 0;
+		list->tiers[i]=NULL;
 	}
-	
+	list->tiers[0]= malloc(sizeof(AmbulationPlatform));
+	list->tiers[0]->min=0;
+	list->tiers[0]->max=3072;
+	list->tiers[0]->next= NULL;
 	for(i=0;i<houseNum;i++)
 	{
-		if(abs(houseList[i]->image->x-x)<houseList[i]->image->w && abs(houseList[i]->image->y-y)<houseList[i]->image->h )
-		{
-			index = i;
-			break;
-		}
+		insertAmbulationPlatform(list,(640-houseList[i]->posY-30)/(mapHeight/7),houseList[i]->posX,houseList[i]->posX+houseList[i]->image->w);
+		insertAmbulationPlatform(list,(640-houseList[i]->posY-30+houseList[i]->image->h)/(mapHeight/7),houseList[i]->posX,houseList[i]->posX+houseList[i]->image->w);
 	}
 	
-	if (index ==-1)
+	return list;
+}
+void insertAmbulationPlatform(AmbulationTowerList * list, int level, int min, int max)
+{
+	list->tiers[level] = recurseInsertAmbulationPlatform(list->tiers[level],level, min,max);
+	postAmbulationInsertionRecalibration(list,level);
+}
+AmbulationPlatform * recurseInsertAmbulationPlatform(AmbulationPlatform * curr, int level, int min, int max)
+{
+	AmbulationPlatform * temp;
+	if(curr == NULL)
 	{
-		
-		for(i=0;i<houseNum;i++)
+		temp= malloc(sizeof(AmbulationPlatform));
+		temp->next = NULL;
+		temp->min = min;
+		temp->max = max;
+		return temp;
+	}
+	else if(curr->min>max)
+	{
+		temp =  malloc(sizeof(AmbulationPlatform));
+		temp->next = curr;
+		temp->min = min;
+		temp->max = max;
+		return temp;
+	}
+	else if(curr->max>= min)
+	{
+		if(min<curr->min)
 		{
-			if(abs(houseList[i]->image->x-xTo)<houseList[i]->image->w && abs(houseList[i]->image->y-yTo)<houseList[i]->image->h )
-			{
-				index = i;
-				dir = -dir;
-				loose = 1;
-				break;
-			}
+			curr->min = min;
 		}
-		if(index == -1)
+		if(max> curr->max)
+			curr->max = max;
+		return curr;
+	}
+	else
+	{
+		curr->next = recurseInsertAmbulationPlatform(curr->next,level, min,max);
+	}
+	return curr;
+}
+void postAmbulationInsertionRecalibration(AmbulationTowerList * list, int level)
+{
+	AmbulationPlatform *curr,* temp;
+	curr = list->tiers[level];
+	while (curr != NULL && curr->next != NULL)
+	{
+		if(curr->max>curr->next->min)
 		{
-			return 0;
+			temp = curr->next;
+			curr->max = curr->next->max;
+			curr->next = temp->next;
+			free(temp);
+		}
+		curr = curr->next;
+	}
+}
+
+/*void drawAmbulationPlatforms(AmbulationTowerList * list,Game * game)
+{
+	int i;
+	AmbulationPlatform * curr;
+	for(i=0;i<7;i++)
+	{
+		SDL_SetRenderDrawColor(game->renderer, 255, 0, 255, 128);
+		curr = list->tiers[i];
+		while(curr != NULL)
+		{
+			SDL_RenderDrawLine(game->renderer,curr->min,640-i*89-30,curr->max,640-i*89-30);
+			curr = curr->next;
 		}
 	}
-	while (loop)
+	SDL_SetRenderDrawColor(game->renderer,0,0,0,0);
+}*/
+int canTraverseToLevel(AmbulationTowerList * list, int levelTo, int currLevel, int xTo, int x, int min, int max)
+{
+	AmbulationPlatform * curr;
+	if(levelTo <0 || levelTo > 6)
+		return 0;
+	if(currLevel <0 || currLevel > 6)
+		return 0;
+	curr = list->tiers[currLevel];
+	while(curr != NULL)
 	{
-		loop = 0;
-		for(i=0;i<houseNum;i++)
+		
+		if(levelTo == currLevel)
 		{
-			if(i != index && dir == -1)
+			if(curr->max>min && curr->min <= max)
 			{
-				if(houseList[i]->image->y + 89 == houseList[index]->image->y)
+				if (xTo<curr->min)
 				{
-					if(abs(houseList[index]->image->x-houseList[i]->image->x)<houseList[index]->image->w)
-					{
-						if(abs(houseList[i]->image->y+houseList[i]->image->h-yTo)<30)
-						{
-							if(firstIndex>=0)
-							{
-								if(!loose)
-								{
-									if(houseList[firstIndex]->image->x<x && houseList[firstIndex]->image->x+houseList[firstIndex]->image->w>x )
-									{
-										return 2;
-									}
-									else if(houseList[firstIndex]->image->x+houseList[firstIndex]->image->w/2<x)
-										return -1;
-									else
-										return 1;
-								}
-								else
-								{
-									if(houseList[firstIndex]->image->x<x && houseList[firstIndex]->image->x+houseList[firstIndex]->image->w>x )
-									{
-										return 2;
-									}
-									else if(houseList[firstIndex]->image->x+houseList[firstIndex]->image->w/2<x)
-										return 1;
-									else
-										return -1;
-								}
-							}
-							else
-							{
-								if(!loose)
-								{
-									if(houseList[i]->image->x<x && houseList[i]->image->x+houseList[i]->image->w>x )
-									{
-										return 2;
-									}
-									else if(houseList[i]->image->x+houseList[i]->image->w/2<x)
-										return -1;
-									else
-										return 1;
-								}
-								else
-								{
-									if(houseList[i]->image->x<x && houseList[i]->image->x+houseList[i]->image->w>x )
-									{
-										return 2;
-									}
-									else if(houseList[i]->image->x+houseList[i]->image->w/2<x)
-										return 1;
-									else
-										return -1;
-								}
-							}
-						}
-						else
-						{
-							index = i;
-							if(firstIndex<0)
-								firstIndex = i;
-							loop = 1;
-							break;
-						}
-						
-					}
-					
-					
+					return 0;
+				}
+				else if (xTo>= curr->min && xTo < curr->max)
+				{
+					if(abs(x-xTo)<20)
+						return 2;
+					else if(x<xTo)
+						return 1;
+					else
+						return -1;
 				}
 			}
-			else if(i != index && dir == 1)
+			else if(curr->min > max)
+				return 0;
+		}
+		else if(x>=curr->min && x<=curr->max)
+		{
+			if(levelTo<currLevel)
 			{
-				if(houseList[i]->image->y - 89 == houseList[index]->image->y)
+				int temp = canTraverseToLevel(list,levelTo,currLevel-1,xTo,x,curr->min,curr->max);
+				if(temp!=0)
 				{
-					if(abs(houseList[index]->image->x-houseList[i]->image->x)<houseList[index]->image->w)
-					{
-						if(abs(houseList[i]->image->y+houseList[i]->image->h-yTo-30)<30)
-						{
-							if(firstIndex>=0)
-							{
-								if(!loose)
-								{
-									if(houseList[firstIndex]->image->x<x && houseList[firstIndex]->image->x+houseList[firstIndex]->image->w>x )
-									{
-										return 2;
-									}
-									else if(houseList[firstIndex]->image->x+houseList[firstIndex]->image->w/2<x)
-										return -1;
-									else
-										return 1;
-								}
-								else
-								{
-									if(houseList[firstIndex]->image->x<x && houseList[firstIndex]->image->x+houseList[firstIndex]->image->w>x )
-									{
-										return 2;
-									}
-									else if(houseList[firstIndex]->image->x+houseList[firstIndex]->image->w/2<x)
-										return 1;
-									else
-										return -1;
-								}
-							}
-							else
-							{
-								if(!loose)
-								{
-									
-									if(houseList[i]->image->x<x && houseList[i]->image->x+houseList[i]->image->w>x )
-									{
-										return 2;
-									}
-									else if(houseList[i]->image->x+houseList[i]->image->w/2<x)
-									{
-										
-										return -1;
-									}
-									else
-									{
-										return 1;
-										
-									}
-								}
-								else
-								{
-									if(houseList[i]->image->x<x && houseList[i]->image->x+houseList[i]->image->w>x )
-									{
-										return 2;
-									}
-									else if(houseList[i]->image->x+houseList[i]->image->w/2<x)
-										return 1;
-									else
-										return -1;
-								}
-							}
-						}
-						else
-						{
-							index = i;
-							if(firstIndex<0)
-								firstIndex = i;
-							loop =1;
-							break;
-						}
-					}
 					
+					if(abs(x-(curr->min+(curr->max-curr->min)/2))<20)
+						return 2;
+					else if(x<(curr->min+(curr->max-curr->min)/2))
+						return 1;
+					else
+						return -1;
+				}
+			}
+			else
+			{
+				int temp = canTraverseToLevel(list,levelTo,currLevel+1,xTo,x,curr->min,curr->max);
+				if(temp!=0)
+				{
+					if(currLevel == 0)
+						return temp;
+					if(abs(x-(curr->min+(curr->max-curr->min)/2))<20)
+						return 2;
+					else if(x<(curr->min+(curr->max-curr->min)/2))
+						return 1;
+					else
+						return -1;
 				}
 			}
 		}
-	}
-	if(!loose)
-	{
-		
-		if(abs(y-yTo)>3)
-			return 2;
-	}
-	else if(loose)
-	{
-		if(houseList[index]->image->x+houseList[index]->image->w/2<x)
-			return -1;
-		else
-			return 1;
+		curr = curr->next;
 	}
 	return 0;
+}
+Effect * newEffect(Effect * list,Image * image,int posX, int posY, int length)
+{
+	Effect * temp,*retval;
+	
+	temp = malloc(sizeof(Effect));
+	temp->image = imageCopy(image);
+	moveImageTo(temp->image,posX,posY+image->h);
+	temp->timer = length;
+	temp->microtimer = 5;
+	temp->next = NULL;
+	retval = list;
+	if(list == NULL)
+	{
+		return temp;
+	}
+	else
+	{
+		temp->next = retval;
+		return temp;
+	}
+}
+Effect * processEffects(Effect * first,Game * game)
+{
+	Effect * temp;
+	temp = first;
+	while(temp!=NULL)
+	{
+		drawImage(temp->image,game);
+		fprintf(stderr,"Timer %d, microtimer %d\n",temp->microtimer,temp->timer);
+		
+		if(temp->microtimer==0)
+		{
+			animateSpeed(temp->image,1);
+			temp->microtimer=5;
+			temp->timer--;
+		}
+		temp->microtimer--;
+		temp=temp->next;
+	}
+	return clearTimeredEffects(first);
+}
+Effect * clearTimeredEffects(Effect * effect)
+{
+	while(effect!=NULL && effect->timer == 0)
+	{
+		effect = effect->next;
+	}
+	if(effect!=NULL)
+	{
+		effect->next = clearTimeredEffects(effect->next);
+		return effect;
+	}
+	else 
+		return NULL;
+}
+
+FlyingItem * newFlyingItem(FlyingItem * list,Image * image,int startX, int startY,int endX, int endY, int delay)
+{
+	FlyingItem * temp,*retval;
+	
+	temp = malloc(sizeof(FlyingItem));
+	temp->image = imageCopy(image);
+	moveImageTo(temp->image,startX,startY);
+	temp->next = NULL;
+	temp->startX = startX;
+	temp->startY = startY;
+	temp->endX = endX;
+	temp->delay = delay;
+	temp->endY = endY;
+	moveImageTo(temp->image,startX,startY);
+	retval = list;
+	if(list == NULL)
+	{
+		return temp;
+	}
+	else
+	{
+		temp->next = retval;
+		return temp;
+	}
+}
+FlyingItem * processFlyingItems(FlyingItem * first,Game * game)
+{
+	FlyingItem * temp;
+	temp = first;
+	
+	while(temp!=NULL)
+	{
+		if(temp->delay<=0)
+		{
+			
+			rotateImage(temp->image,6);
+			moveImage(temp->image,7,0);
+			
+			moveImageTo(temp->image,temp->image->x,temp->startY+(temp->endY-temp->startY)*((temp->image->x-temp->startX*1.0)/(temp->endX-temp->startX)*1.0));
+			
+			
+			drawImage(temp->image,game);
+		}
+		else
+		{
+			temp->delay--;
+		}
+		temp=temp->next;
+	}
+	return clearFlyingItems(first);
+}
+FlyingItem * clearFlyingItems(FlyingItem * item)
+{
+	while(item!=NULL && item->image->x>item->endX)
+	{
+		item = item->next;
+	}
+	if(item!=NULL)
+	{
+		item->next = clearFlyingItems(item->next);
+		return item;
+	}
+	else 
+		return NULL;
 }

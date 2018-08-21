@@ -351,6 +351,22 @@ void animateRange(Image * image, int min, int max)
 	}
 }
 
+void animateRangeSpeed(Image * image, int min, int max, int speed)
+{
+	image->animTime = (image->animTime + 1)%60;
+	if(image->animTime%speed==0)
+	{
+		if(image->animPos < min)
+			image->animPos = min;
+		if(image->animPos >= max)
+			image->animPos = min;
+
+		image->srcPos.x = (image->w*image->animPos)%(image->w*image->xAnim);
+		image->srcPos.y = (((image->w*image->animPos)/(image->w*image->xAnim))*image->h)%(image->h*image->yAnim);
+		image->animPos = image->animPos+1;	
+	}
+}
+
 void setToFrame(Image * image, int x, int y)
 {
 	image->srcPos.x = image->w*x;
@@ -416,4 +432,9 @@ void freeImage(Image * image)
 {
 	SDL_DestroyTexture(image->image);
 	free(image);
+}
+
+void rotateImage(Image * image,int r)
+{
+	image->r +=r;
 }
