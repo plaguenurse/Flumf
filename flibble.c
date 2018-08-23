@@ -65,7 +65,7 @@ Game * setup(int width,int height)
 		return NULL;
 	}
 	
-	game->window = SDL_CreateWindow("GAME",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,width,height,SDL_WINDOW_RESIZABLE);
+	game->window = SDL_CreateWindow("We Must Praise Our Glorious Leader The Flumf",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,width,height,SDL_WINDOW_RESIZABLE);
 	
 	
 	if (game->window == NULL)
@@ -213,6 +213,10 @@ void getEvents(EventChain * chain, Game * game)
 				chain->key[event.key.keysym.sym] = 0;
 			else if(event.key.keysym.sym >= 1073741903 && event.key.keysym.sym <= 1073741906)
 				chain->arrows[event.key.keysym.sym - 1073741903] = 0;
+			if(event.key.keysym.sym == SDLK_ESCAPE)
+			{
+				chain->close = 1;
+			}
 		}
 		if(event.type == SDL_MOUSEWHEEL)
 		{
