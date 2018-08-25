@@ -135,7 +135,7 @@ ObjectList* getList(char * fileLocation,Game * game)
 	Object * tempobj;
 	char buffer[512] = {0};
 	int i = 0;
-	int tiers = 6;// non hardcoded? might be necesary 
+	int tiers = 10;// non hardcoded? might be necesary 
 	Uint8 listSize=0;
 	char * temp;
 	FILE * file=fopen(fileLocation,"r");
@@ -717,7 +717,10 @@ Adventurer * newAdventurer(int type, Game * game)
 	pal->head= NULL;
 	pal->feet= NULL;
 	pal->advancedMove = 0;
-	pal->image = loadImage("images/pals/1.png",8,3,game);	
+	if(type == 1)
+		pal->image = loadImage("images/pals/1.png",8,3,game);	
+	else if (type ==2)
+		pal->image = loadImage("images/pals/2.png",8,3,game);
 	pal->status = 0;
 
 	pal->type = type;
@@ -3120,7 +3123,7 @@ void insertAllItems(ObjectList * items, Pile * list)
 {
 	int i,j;
 	PileItem* temp;
-	for(i=0;i<6;i++)
+	for(i=0;i<10;i++)
 	{
 		for(j=0;j<items->size[i];j++)
 		{

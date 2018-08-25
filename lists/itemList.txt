@@ -22,6 +22,7 @@ gear,images/objects/gear.png,2,1000,250,0,0,900,0,0
 glass,images/objects/glass.png,4,700,250,500,0,0,0,0
 glue,images/objects/glue.png,5,400,60,250,0,0,0,0
 holiday-light,images/objects/holiday-light.png,2,45,5,0,0,0,0,50
+ingot,images/objects/ingot.png,9,2000,450,0,0,1800,0,0
 ipod,images/objects/ipod.png,1,650,450,0,0,0,0,300
 iron,images/objects/iron.png,3,2000,450,0,0,1500,0,200
 jar,images/objects/jar.png,1,700,500,290,0,0,0,0
@@ -59,6 +60,7 @@ strawberry,images/objects/strawberry.png,1,110,330,0,0,0,150,0
 tack,images/objects/tack.png,0,50,50,0,0,10,0,0
 tape,images/objects/tape.png,0,250,50,30,0,0,0,0
 thermometer,images/objects/thermometer.png,3,370,100,70,0,0,0,50
+thimble,images/objects/thimble.png,3,370,100,0,0,120,0,0
 tin-can,images/objects/tin-can.png,0,700,580,0,0,210,0,0
 toothbrush,images/objects/toothbrush.png,3,325,150,120,10,0,0,0
 toy-car,images/objects/toycar.png,2,400,200,250,0,40,0,0

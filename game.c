@@ -28,6 +28,8 @@ int main(void)
 	Image * poof;
 	int flumfAuto = 0;
 	Image * dirtPile, *growing, *grown, *fuelGauge;
+	Image * mineGear1, * mineGear2, * mineBlock;
+	Item * minetemp = NULL;
 	SDL_Rect tempRect;
 	int growTimer = 0;
 	Item * growItem = NULL;
@@ -137,7 +139,9 @@ int main(void)
 	char redrawHouses = 0, redrawMenu = 0;
 	
 	int fuelLevel = 0;
-	int fuelMax = 1000;
+	int fuelMax = 50000;
+	int mineTimer =0;
+	int mineTimerMax =350;
 	int mineAutoConsume = 0;
 	int mineCanAutoConsume = 0;
 	
@@ -213,6 +217,9 @@ int main(void)
 	growing = loadImage("images/leaf1.png", 1,1,game);
 	grown = loadImage("images/leaf2.png", 1,1,game);
 	fuelGauge = loadImage("images/fluid-level.png", 1,8,game);
+	mineGear1 = loadImage("images/gear1.png", 1,1,game);
+	mineGear2 = loadImage("images/gear2.png", 1,1,game);
+	mineBlock = loadImage("images/mine.png", 1,1,game);;
 	
 
 	font = newFont(loadImage("images/font.png",13,5,game));
@@ -452,6 +459,9 @@ int main(void)
 				{
 					specialization = 3;
 					lockTier(3,recipeList);
+					growBuilding = houseList[houseNum-1]->image;
+					unlockUpgradeTier(4,upgradeList);
+					wonderModifier++;
 				}
 				if(houseList[houseNum-1]->type == 8)
 				{
@@ -1113,9 +1123,29 @@ int main(void)
 			//Farm Behaviour End
 			
 			//Mine Behaviour
-			
-			
-			
+			if(specialization==3)
+			{
+				if(fuelLevel>0)
+				{
+					fuelLevel-=4;
+					if(fuelLevel <0)
+					{
+						fuelLevel = 0;
+					}
+					mineTimer--;
+					if(mineTimer <= 0)
+					{
+						mineTimer = mineTimerMax;
+						minetemp = getItemGroup(itemList,9,9999);
+						if(minetemp!=NULL)
+						{
+							moveImageTo(minetemp->image,growBuilding->x,growBuilding->y+growBuilding->h-minetemp->image->h);
+							addItemToLooseList(looseList,minetemp,2,0);
+						}
+						minetemp = NULL;
+					}
+				}
+			}
 			//Mine Behaviour End
 			
 			//ProcessAnimations
@@ -1631,6 +1661,7 @@ int main(void)
 						clickable = 1;
 					}
 					drawBackgroundTile(game,bkgrnd);
+					
 					moveImageTo(redo,game->boundingBox.w-20-redo->w,close->h+20);
 					if(mineCanAutoConsume)
 					{
@@ -1647,9 +1678,71 @@ int main(void)
 						drawImage(redo,game);
 					}
 					
-						
+					
 					moveImageTo(dirtPile,game->boundingBox.w*3/4-dirtPile->w/2,game->boundingBox.h*3/4-dirtPile->h/2);
-			
+					drawImage(dirtPile,game);
+					moveImageTo(mineBlock,game->boundingBox.w*3/4-mineBlock->w/2,game->boundingBox.h*3/4-dirtPile->h/2-mineBlock->h*3/4);
+					drawImage(mineBlock,game);
+					moveImageTo(mineGear2,game->boundingBox.w*3/4-mineBlock->w/2+18,game->boundingBox.h*3/4-dirtPile->h/2-mineBlock->h*3/4+17);
+					if(fuelLevel>0)
+						rotateImage(mineGear2,-1);
+					drawImage(mineGear2,game);
+					moveImageTo(mineGear1,game->boundingBox.w*3/4-mineBlock->w/2-15,game->boundingBox.h*3/4-dirtPile->h/2-mineBlock->h*3/4+17);
+					if(fuelLevel>0)
+						rotateImage(mineGear1,1);
+					drawImage(mineGear1,game);
+					
+					moveImageTo(fuelGauge,game->boundingBox.w-fuelGauge->w,game->boundingBox.h/2);
+					for(j=10;j>0;j--)
+					{
+						if(j==1)
+						{
+							if(fuelLevel*(j+1)>=fuelMax)
+							{
+								setToFrame(fuelGauge,0,3);
+							}
+							else
+							{
+								setToFrame(fuelGauge,0,0);
+							}
+							drawImage(fuelGauge,game);
+							moveImage(fuelGauge,0,-fuelGauge->h);
+						}
+						else if(j==10)
+						{
+							if(fuelLevel==0)
+							{
+								setToFrame(fuelGauge,0,2);
+							}
+							else if(fuelLevel>=fuelMax/10)
+							{
+								setToFrame(fuelGauge,0,5);
+							}
+							else
+							{
+								setToFrame(fuelGauge,0,7);
+							}
+							drawImage(fuelGauge,game);
+							moveImage(fuelGauge,0,-fuelGauge->h);
+						}
+						else
+						{
+							if(fuelLevel*(j)>=fuelMax)
+							{
+								setToFrame(fuelGauge,0,4);
+							}
+							else if(fuelLevel*(j+1)>=fuelMax)
+							{
+								setToFrame(fuelGauge,0,6);
+							}
+							else
+							{
+								setToFrame(fuelGauge,0,1);
+							}
+							drawImage(fuelGauge,game);
+							moveImage(fuelGauge,0,-fuelGauge->h);
+						}
+					}
 					drawImage(menuImg,game);
 					grabbed = drawPileDetail(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,&maxscroll, &clickable,&selectionInfo ,selectionMenu, ordering);
 					if(grabbed!=NULL)
