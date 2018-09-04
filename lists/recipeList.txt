@@ -1,9 +1,10 @@
 Forge,images/buildings/forge.png,1,soda,1,scissors,1,screwdriver,1,lighter,1
 Upgrade,images/buildings/upgrade.png,2,usb-drive,1,walkie-talkie,1,nail,1,%levels,100,100,100,100,100
-Attack_Tower,images/buildings/attack.png,3,soda,1,umbrella,1,holiday-light,1,fork,1,%levels,0,0,200,200,0
+Attack_Tower,images/buildings/attack.png,2,soda,1,umbrella,1,holiday-light,1,fork,1,%levels,0,0,200,200,0
 Shack,images/buildings/shack.png,2,cup,1,nail,2,%levels,500,0,20,0,0
 House,images/buildings/house.png,2,tape,1,tin-can,1,tack,2,%levels,250,0,50000,0,0
 Gumball_Machine,images/buildings/gumball.png,3,candy,3,coin,2,glass,1,gear,1,%levels,8000,0,200,0,0
 Clothing_Station,images/buildings/clothes.png,3,jar,1,bow,2,needle,3,%levels,200,8000,0,0,0
 Farm,images/buildings/farm.png,3,bread,2,umbrella,1,tin-can,1,%levels,0,0,200,8000,0
 Mine,images/buildings/mine.png,3,rope,1,gear,2,iron,1,lock,1,%levels,0,0,8000,0,200
+Mystery Device,images/error.png,4,%levels,100000,100000,100000,100000,100000

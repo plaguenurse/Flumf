@@ -128,6 +128,18 @@ void drawImagePyramid(Image * image, Game * game , int amount, int midx, int y,i
 	}
 }
 
+void setToLoop(ObjectList* list,int loop)
+{
+	int i;
+	int j;
+	for(i=0;i<list->tiersize;i++)
+	{
+		for(j=0;j<list->size[i];j++)
+		{
+			setToFrame(list->list[i][j]->image,loop,0);
+		}
+	}
+}
 
 ObjectList* getList(char * fileLocation,Game * game)
 {
@@ -161,7 +173,7 @@ ObjectList* getList(char * fileLocation,Game * game)
 		temp = strtok(buffer,",");
 		tempobj->name = malloc(sizeof(char)*(strlen(temp)+1));
 		strcpy(tempobj->name,temp);
-		tempobj->image = loadImage(strtok(NULL,","),1,1,game);
+		tempobj->image = loadImage(strtok(NULL,","),4,1,game);
 		tempobj->rarity = atoi(strtok(NULL,","));
 		tempobj->mass = atoi(strtok(NULL,","));
 		tempobj->value = atoi(strtok(NULL,","));
@@ -186,6 +198,13 @@ Item * getItemGroup(ObjectList * list, int tier, int chutzpahPool)
 	if(tier<0)
 		tier = 0;
 	point = getIndexPointforgrabby(list,tier,chutzpahPool);
+	while(point == 0)
+	{
+		tier--;
+		if(tier<0)
+			tier = 0;
+		point = getIndexPointforgrabby(list,tier,chutzpahPool);
+	}
 	return getItem(list->list[tier][rand()%(point)]);
 }
 
@@ -712,10 +731,7 @@ Adventurer * newAdventurer(int type, Game * game)
 	pal->burdenedmoxie = pal->moxie;
 	pal->chutzpah = 50 + rand() % 35;
 	pal->wonder = 1 + (rand()%100>=80);
-	
-	pal->hat= NULL;
-	pal->head= NULL;
-	pal->feet= NULL;
+
 	pal->advancedMove = 0;
 	if(type == 1)
 		pal->image = loadImage("images/pals/1.png",8,3,game);	
@@ -744,23 +760,18 @@ void giveAdventurerNewItemByName(Adventurer * pal, char * itemName, ObjectList *
 	moveImageTo(pal->item->image,pal->image->x - (pal->item->image->w)/2 + pal->image->x/2,pal->image->y - pal->item->image->h);
 }
 
-void drawAdventurer(Adventurer * pal, Game * game)
+void drawAdventurer(Adventurer * pal, Game * game, Image * palImage)
 {
 	if(pal!=NULL)
 	{
-		drawImage(pal->image,game);
-		if(pal->hat !=NULL )
+		if(pal->image->h!=palImage->h)
 		{
-			drawImage(pal->hat->image,game);
+			pal->image->h = palImage->h;
+			pal->image->srcPos.h = palImage->srcPos.h;
+			pal->image->destPos.h = palImage->destPos.h;
+			
 		}
-		if(pal->head !=NULL )
-		{
-			drawImage(pal->head->image,game);
-		}
-		if(pal->feet !=NULL )
-		{
-			drawImage(pal->feet->image,game);
-		}
+		SDL_RenderCopy(game->renderer,palImage->image,&pal->image->srcPos,&pal->image->destPos);
 		if(pal->item !=NULL )
 		{
 			drawImage(pal->item->image,game);
@@ -793,35 +804,13 @@ void moveAdventurer(Adventurer * pal, int x, int y)
 	else if(pal->dir==-1 && x>0)
 	{
 		setToFrame(pal->image,0,0);
-		if(pal->hat!=NULL)
-		{
-			setToFrame(pal->hat->image,0,0);
-		}
-		if(pal->head!=NULL)
-		{
-			setToFrame(pal->head->image,0,0);
-		}
-		if(pal->feet!=NULL)
-		{
-			setToFrame(pal->feet->image,0,0);
-		}
+		
 		pal->dir = 1;
 	}
 	else if(pal->dir==1 && x<0)
 	{
 		setToFrame(pal->image,0,1);
-		if(pal->hat!=NULL)
-		{
-			setToFrame(pal->hat->image,0,1);
-		}
-		if(pal->head!=NULL)
-		{
-			setToFrame(pal->head->image,0,1);
-		}
-		if(pal->feet!=NULL)
-		{
-			setToFrame(pal->feet->image,0,1);
-		}		
+			
 		pal->dir = -1;
 	}
 	
@@ -847,7 +836,7 @@ void moveAdventurer(Adventurer * pal, int x, int y)
 	
 }
 
-void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs, int moxieBonus, int scrollmin,AmbulationTowerList * ambulationList)
+void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs, int moxieBonus, int scrollmin,AmbulationTowerList * ambulationList, Image * palImage)
 {
 	int ambulation = 0;
 	if(pal->type ==1)
@@ -868,12 +857,12 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 					{
 						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
 					}
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				else
 				{
 					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 			}
 			else
@@ -899,9 +888,9 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 			else
 			{
 				moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
-				drawAdventurer(pal,game);
+				drawAdventurer(pal,game,palImage);
 			}
-			drawAdventurer(pal,game);
+			drawAdventurer(pal,game,palImage);
 		}
 		else if (pal->status == 3)
 		{
@@ -911,7 +900,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 				if ((abs(pal->image->y-640+30+pal->image->h)<3 || (abs(pal->image->y-pal->posToY)<3)) && canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY)!=0)
 				{
 					pal->advancedMove = 0;
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				else if (ambulation !=0)
 				{
@@ -923,12 +912,12 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 					{
 						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
 					}
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				else
 				{
 					moveAdventurer(pal,0,(pal->image->y<640-30-pal->image->h)?3:-3);
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				
 			}
@@ -948,7 +937,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 					{
 						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
 					}
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				else if(abs(pal->image->x-pal->posToX)<getMoxie(pal,moxieBonus)+20)
 				{
@@ -958,7 +947,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 				else
 				{
 					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 			}
 		}
@@ -979,7 +968,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 					{
 						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
 					}
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				else if(pal->image->x+20 >= pal->posToX)
 				{
@@ -988,7 +977,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 				else
 				{
 					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 	
 			}
@@ -1015,7 +1004,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 					{
 						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
 					}
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				else if(abs(pal->image->x-pal->posToX)<getMoxie(pal,moxieBonus)+20)
 				{
@@ -1024,7 +1013,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 				else
 				{
 					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 			}
 		}
@@ -1049,9 +1038,9 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 				else
 				{
 					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
-				drawAdventurer(pal,game);
+				drawAdventurer(pal,game,palImage);
 			}
 			else
 			{
@@ -1077,7 +1066,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 				{
 					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
 				}
-				drawAdventurer(pal,game);
+				drawAdventurer(pal,game,palImage);
 			}
 			else 
 			{
@@ -1088,7 +1077,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 				else
 				{
 					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 			}
 		}
@@ -1106,12 +1095,12 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 				{
 					moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
 				}
-				drawAdventurer(pal,game);
+				drawAdventurer(pal,game,palImage);
 			}
 			else
 			{
 				moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
-				drawAdventurer(pal,game);
+				drawAdventurer(pal,game,palImage);
 			
 				if(abs(pal->image->x-pal->posToX)<getMoxie(pal,moxieBonus))
 				{
@@ -1138,14 +1127,14 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 					{
 						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
 					}
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				else
 				{
 					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
-				drawAdventurer(pal,game);
+				drawAdventurer(pal,game,palImage);
 			}
 			else
 			{
@@ -1160,7 +1149,7 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 				if ((abs(pal->image->y-640+30+pal->image->h)<3 || (abs(pal->image->y-pal->posToY)<3)) && canAmbulate(ambulationList,pal->image->x, pal->image->y, pal->posToX,pal->posToY)!=0)
 				{
 					pal->advancedMove = 0;
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				else if (ambulation !=0)
 				{
@@ -1172,12 +1161,12 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 					{
 						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
 					}
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				else
 				{
 					moveAdventurer(pal,0,(pal->image->y<640-30-pal->image->h)?3:-3);
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				
 			}
@@ -1202,12 +1191,12 @@ void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y
 					{
 						moveAdventurer(pal,getMoxie(pal,moxieBonus)*ambulation,0);
 					}
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 				else
 				{
 					moveAdventurer(pal,getMoxie(pal,moxieBonus)*(pal->image->x-pal->posToX<0?1:-1),0);
-					drawAdventurer(pal,game);
+					drawAdventurer(pal,game,palImage);
 				}
 			}
 		}
@@ -1471,6 +1460,18 @@ void putInPile(Pile * pile,Item * item)
 	}
 	curr->size++;
 	pile->total++;
+}
+void putMultInPile(Pile * pile,Item * item,int num)
+{
+	PileItem* curr = pile->firstAlpha;
+	if(item == NULL)
+		return;
+	while(strcmp(item->name,curr->item->name)!=0)
+	{
+		curr = curr->nextAlpha;
+	}
+	curr->size+=num;
+	pile->total+=num;
 }
 
 
@@ -1859,6 +1860,82 @@ PileItem * drawPileDetail(Pile * pile, Game * game, Font * font, int * offsety, 
 	return retval;
 }
 
+PileItem * drawPileDetailSingle(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image* tinyResources, int * scrollMax, int* clickable, int * selection,Image *selectionMenu,Image * ordering, char* name)
+{
+	PileItem * curr = NULL, *retval = NULL;
+	int  i = 0,scrollhold, tempX,doubletemp;
+	SDL_Rect rect;
+	rect.x = 30;
+	rect.y = *offsety;
+	*canScroll=0;
+	if(*offsety<0)
+		*canScroll=1;
+	rect.w = 0;
+	rect.h = 0;
+
+	curr= pile->firstAlpha;
+
+	while(curr!=NULL)
+	{
+		if(curr->size>0 && strcmp(name,curr->item->name)==0)
+		{
+			tempX= printNumber(rect.x-24,rect.y,game,font,curr->size) -18;
+			writeWords(curr->item->name,font,12,game,rect.x+tempX, rect.y);
+			rect.y+=18;
+			rect.w = curr->item->image->w;
+			rect.h = curr->item->image->h;
+			rect.x+=4*(curr->size);
+			scrollhold = rect.y;
+			for(i = 0;i<curr->size && rect.x>=30;i++)
+			{
+				doubletemp = rect.x;
+				if(rect.x>130)
+				{
+					rect.x=130;
+				}
+				SDL_RenderCopy(game->renderer,curr->item->image->image,&curr->item->image->srcPos,&rect);
+				rect.x = doubletemp;
+				rect.x-=4;
+				rect.y = scrollhold;
+			}
+
+			rect.w=130;
+
+			if(isClicked(&rect,game,game->currLayer))
+			{
+				if (forge)
+					drawStatsItem(curr->item,rect.x+rect.w+10,rect.y+5,game,font,tinyResources, game->boundingBox.w*3/4);
+				if(game->chain->mouse == 1 )
+				{
+					game->chain->mouse = 2;
+					retval = curr;
+				}
+				*clickable = 1;
+			}
+			
+			
+			rect.x=30;
+			rect.y += curr->item->image->h+11;
+			
+		}
+	
+		rect.x = 30;
+		//selector for type
+		{
+			curr= curr->nextAlpha;
+	
+		}
+	}
+	*scrollMax = *offsety-rect.y +game->boundingBox.h-20;
+	if(rect.y > *offsety + game->boundingBox.h-20)
+	{
+		*canScroll += 2;
+	}
+	
+	
+	return retval;
+}
+
 int printNumber(int x, int y, Game * game, Font * font, int num)
 {
 	char words[20];
@@ -2096,12 +2173,7 @@ int getWonder(Adventurer * pal)
 {
 	int retval = 0;
 	retval+=pal->wonder;
-	if(pal->hat != NULL)
-		retval += pal->hat->wonder; 
-	if(pal->head != NULL)
-		retval += pal->head->wonder; 
-	if(pal->feet != NULL)
-		retval += pal->feet->wonder; 
+
 	
 	return retval;
 }
@@ -2110,12 +2182,7 @@ int getMoxie(Adventurer * pal, int moxieBonus)
 {
 	int retval = 0;
 	retval+=pal->moxie;
-	if(pal->hat != NULL)
-		retval += pal->hat->moxie; 
-	if(pal->head != NULL)
-		retval += pal->head->moxie; 
-	if(pal->feet != NULL)
-		retval += pal->feet->moxie; 
+
 	retval+=moxieBonus;
 	return retval;
 }
@@ -2124,85 +2191,8 @@ int getChutzpah(Adventurer * pal)
 {
 	int retval = 0;
 	retval+=pal->chutzpah;
-	if(pal->hat != NULL)
-		retval += pal->hat->chutzpah; 
-	if(pal->head != NULL)
-		retval += pal->head->chutzpah; 
-	if(pal->feet != NULL)
-		retval += pal->feet->chutzpah; 
 	
 	return retval;
-}
-
-Clothing * givePalNewHat(Clothing * hat, Adventurer * pal)
-{
-	Clothing * oldHat = pal->hat;
-	pal->hat = hat;
-	moveImageTo(pal->hat->image,pal->image->x,pal->image->y+pal->image->h - pal->hat->image->h);
-	return oldHat;
-}
-Clothing * givePalNewHead(Clothing * head, Adventurer * pal)
-{
-	Clothing * oldHead = pal->head;
-	pal->head = head;
-	moveImageTo(pal->head->image,pal->image->x,pal->image->y);
-	return oldHead;
-}
-Clothing * givePalNewFeet(Clothing * feet, Adventurer * pal)
-{
-	Clothing * oldFeet = pal->feet;
-	pal->feet = feet;
-	moveImageTo(pal->feet->image,pal->image->x,pal->image->y);
-	return oldFeet;
-}
-
-Clothing * newClothing(Image * image, int type, int id)
-{
-	Clothing * retval;
-	retval = malloc(sizeof(Clothing));
-	retval->image = image;
-
-	if(type == 0)
-	{
-		retval->type = 0;
-		retval->moxie = 0;
-		retval->chutzpah = 80;
-		retval->wonder = 0;
-	}
-	else if(type == 1)
-	{
-		retval->type = 1;
-		retval->moxie = 0;
-		retval->chutzpah = 0;
-		retval->wonder = 2;
-	}
-	else if(type == 2)
-	{
-		retval->type = 2;
-		retval->moxie = 2;
-		retval->chutzpah = 0;
-		retval->wonder = 0;
-	}
-	return retval;
-}
-
-void addClothes(Clothing * clothes, ClothingRack * rack)
-{
-	rack->size++;
-	rack->list = realloc(rack->list,sizeof(Clothing *) * rack->size);
-	rack->list[rack->size-1] = clothes;
-}
-
-Clothing * suckClothes(int n, ClothingRack * rack)
-{
-	Clothing * item = rack->list[n-1];
-	int i;
-	for(i=n;i<rack->size;i++)
-	{
-		rack->list[n-1] = rack->list[n];
-	}
-	rack->size--;
-	return item;
 }
 
 ProductionQueue * initProdQueue(void)
@@ -2310,14 +2300,12 @@ House ** checkQueueHouse(ProductionQueue * queue, House ** houseList, int * hous
 
 void itemSave(Pile * pile, FILE * savefile)
 {
-	int i;
 	PileItem * trav= pile->firstAlpha;
 	while(trav!=NULL)
 	{
-		for(i=0;i<trav->size;i++)
-		{
-			fprintf(savefile,"item %s\n",trav->item->name);
-		}
+
+		fprintf(savefile,"item %s %d\n",trav->item->name,trav->size);
+
 		trav = trav->nextAlpha;
 	}
 }
@@ -2333,16 +2321,6 @@ char usefulstrcmp(char* input, char * match)
 	return 1;
 }
 
-Clothing * dupeClothing(Clothing * clothes)
-{
-	Clothing* newClothes = malloc(sizeof(Clothing));
-	newClothes->image = imageCopy(clothes->image);
-	newClothes->type = clothes->type;
-	newClothes->moxie = clothes->moxie;
-	newClothes->chutzpah = clothes->chutzpah;
-	newClothes->wonder = clothes->wonder;
-	return newClothes;
-}
 
 Item * dupeItem(Item * item, ObjectList * list)
 {
@@ -2360,46 +2338,6 @@ Item * dupeItem(Item * item, ObjectList * list)
 	itemRet->plastic = item->plastic;
 	itemRet->technology = item->technology;
 	return itemRet;*/
-}
-
-void addClothingToQueue(ProductionQueue * queue, Clothing ** clothes,Recipe * recipe, Pile * pile, ObjectList * list, int clotheNum)
-{
-
-	PileItem * item = NULL;
-	int i,j;
-	PQueue * tempQueue = malloc(sizeof(PQueue));
-
-	
-	tempQueue->type = 2;
-	tempQueue->returnnum=clotheNum;
-	tempQueue->items = NULL;
-	tempQueue->itemstatus = NULL;
-	tempQueue->queued = clothes;
-	tempQueue->itemsize = 0;
-	
-	
-	for(i =0; i< recipe->size;i++)
-	{
-		item = pile->firstAlpha;
-		
-		while(item!= NULL && strcmp(recipe->nameList[i],item->item->name)!=0 )
-		{
-			item = item->nextAlpha;
-		}
-		for(j=0;j<recipe->numList[i];j++)
-		{
-			tempQueue->itemsize++;
-			tempQueue->items = realloc(tempQueue->items,sizeof(Item*)*(tempQueue->itemsize));
-			tempQueue->itemstatus = realloc(tempQueue->itemstatus,sizeof(int)*(tempQueue->itemsize));
-			tempQueue->items[tempQueue->itemsize-1] = copyItem(item->item);
-			tempQueue->itemstatus[tempQueue->itemsize-1] = 0;
-		}
-	}
-	
-	
-	queue->size++;
-	queue->queue = realloc(queue->queue,sizeof(PQueue*)*queue->size);
-	queue->queue[queue->size-1] = tempQueue;
 }
 
 int maximum(int v1, int v2)
@@ -2732,14 +2670,15 @@ UpgradeList* getUpgradeList(char * fileLocation, Game * game)
 		upgradeList->list[i] = malloc(sizeof(Upgrade));	
 		temp = strtok(buffer,",");
 		upgradeList->list[i]->name = malloc(sizeof(char)*(strlen(temp)+1));
+		
 		strcpy(upgradeList->list[i]->name,temp);
 		temp = strtok(NULL,",");
-		
 		upgradeList->list[i]->desc = malloc(sizeof(char)*(strlen(temp)+1));
 		strcpy(upgradeList->list[i]->desc,temp);
 		upgradeList->list[i]->tier = atoi(strtok(NULL,","));
 		upgradeList->list[i]->nameList = NULL;
 		upgradeList->list[i]->numList = NULL;
+		upgradeList->list[i]->image = NULL;
 		upgradeList->list[i]->levels[0] = 0;
 		upgradeList->list[i]->levels[1] = 0;
 		upgradeList->list[i]->levels[2] = 0;
@@ -2757,6 +2696,11 @@ UpgradeList* getUpgradeList(char * fileLocation, Game * game)
 				upgradeList->list[i]->levels[2]=atoi(strtok(NULL,","));
 				upgradeList->list[i]->levels[3]=atoi(strtok(NULL,","));
 				upgradeList->list[i]->levels[4]=atoi(strtok(NULL,","));
+			}
+			else if(strcmp("%image",temp)==0)
+			{
+				temp = strtok(NULL,",");
+				upgradeList->list[i]->image = loadImage(temp,1,1,game);
 			}
 			else
 			{
@@ -2952,7 +2896,11 @@ int drawUpgrades(UpgradeList * upgradeList,Game * game,Font * font,Image * upgra
 			
 			writeWords(upgradeList->list[i]->name,font,12,game,tempRect.x,tempRect.y + 20);
 			writeWordsMulti(upgradeList->list[i]->desc,font,12,game,tempRect.x,tempRect.y + 45,180);
-			
+			if(upgradeList->list[i]->image!=NULL)
+			{
+				moveImageTo(upgradeList->list[i]->image,tempRect.x,tempRect.y+50+13*(strlen(upgradeList->list[i]->desc)/(18)));
+				drawImage(upgradeList->list[i]->image,game);
+			}
 			tempRect.y += 130 - tempRect.h;
 			tempRect.y = doubletemp;
 			tempRect.x += 190;
@@ -3570,7 +3518,6 @@ Effect * processEffects(Effect * first,Game * game)
 	while(temp!=NULL)
 	{
 		drawImage(temp->image,game);
-		fprintf(stderr,"Timer %d, microtimer %d\n",temp->microtimer,temp->timer);
 		
 		if(temp->microtimer==0)
 		{

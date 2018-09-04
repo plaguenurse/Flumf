@@ -22,10 +22,12 @@ int main(void)
 	Image* background, *flumfImg, *menuImg, * recipeImg,* recipeBlack;
 	Image* smolEgg, * bkgrnd, * flumfAnim, * error;
 	Image *newGameImage, *continueGameImage, *mainMenu, *forgeInfo;
-	Image * adventureButton,*craftButton,*leftArrow,*rightArrow,*upArrow,*downArrow, *close, *forgeButton, *natureButton;
-	Image * statusButton, *flumfButton, *upgradeButton, *moveButton, * metalButton;
+	Image * adventureButton,*craftButton,*leftArrow,*rightArrow,*upArrow,*downArrow, *close, *forgeButton, *natureButton,*clothingButton;
+	Image * statusButton, *flumfButton, *upgradeButton, *moveButton, * metalButton, *plasticButton;
 	Image * levelBar, *forgeSlice, *forgeLeftMenu, *tinyResources, *palLevelOutline, * ordering, *redo;
 	Image * poof;
+	Image * palImage;
+	Image * palImageFight;
 	int flumfAuto = 0;
 	Image * dirtPile, *growing, *grown, *fuelGauge;
 	Image * mineGear1, * mineGear2, * mineBlock;
@@ -37,7 +39,7 @@ int main(void)
 	AmbulationTowerList * ambulationTowerList;
 	int flumfEatDelay = 0;
 	FlyingItem * flyingItems = NULL;
-	
+	int loop = 3;
 	double musicVol = 1;
 	double sfxVol = 0.75;
 	
@@ -56,6 +58,7 @@ int main(void)
 	Image * selectionMenu;
 
 	char * activatedUpgrades;
+	char * activatedClothing;
 
 	int scrollmin = 2048;
 	
@@ -112,6 +115,7 @@ int main(void)
 	
 	RecipeList * recipeList;
 	UpgradeList * upgradeList;
+	UpgradeList * clothingList;
 	
 	int specialization = 0;
 	int houseMove = 0;
@@ -154,15 +158,17 @@ int main(void)
 
 	recipeList = getRecipeList("lists/recipeList.txt",game);
 	upgradeList = getUpgradeList("lists/upgradeList.txt",game);
+	clothingList = getUpgradeList("lists/clothingrecipeList.txt",game);
 	
 	activatedUpgrades = calloc(sizeof(char),upgradeList->size);
+	activatedClothing = calloc(sizeof(char),clothingList->size);
 	
 
 	palsPullingPals = malloc(sizeof(Adventurer*)*palpullcapacity);
 	
 	
 	
-	background = loadImage("images/background.png",1,1,game);
+	background = loadImage("images/background.png",1,4,game);
 	forgeInfo = loadImage("images/forge-types.png",5,1,game);
 	
 	palLevelOutline = loadImage("images/levels-outline.png",1,1,game);
@@ -180,15 +186,16 @@ int main(void)
 	settingsBackground = loadImage("images/settingsMenu.png",1,1,game);
 	volSlider = loadImage("images/volSlider.png",1,1,game);
 
-	bkgrnd = loadImage("images/background-tile.png",1,1,game);
-	flumfImg = loadImage("images/flumf.png",1,1,game);
+	bkgrnd = loadImage("images/background-tile.png",4,1,game);
+	flumfImg = loadImage("images/flumf.png",4,1,game);
 	menuImg = loadImage("images/menu.png",1,1,game);
 	recipeImg = loadImage("images/recipeMenu.png",8,6,game);
 	recipeBlack = loadImage("images/recipeBlack.png",8,6,game);
 	smolEgg = loadImage("images/craftables/egg-smol.png",1,1,game);
 	flumfAnim = loadImage("images/flumftestanim.png", 4, 2,game);
 	error = loadImage("images/error.png", 1, 1,game);
-	
+	palImage = loadImage("images/pals/1.png",8,3,game);
+	palImageFight = loadImage("images/pals/2.png",8,3,game);
 	adventureButton = loadImage("images/buttons/whistleboy.png",2,2,game);
 
 	close = loadImage("images/buttons/close.png",1,1,game);
@@ -199,7 +206,9 @@ int main(void)
 	forgeButton = loadImage("images/buttons/forge.png",1,1,game);
 	statusButton = loadImage("images/buttons/party.png",1,1,game);
 	natureButton = loadImage("images/buttons/nature.png",1,1,game);
+	clothingButton = loadImage("images/buttons/clothing.png",1,1,game);
 	metalButton = loadImage("images/buttons/metal.png",1,1,game);
+	plasticButton = loadImage("images/buttons/plastic.png",1,1,game);
 	flumfButton = loadImage("images/buttons/flumf.png",1,1,game);
 	leftArrow = loadImage("images/buttons/l-arrow.png", 1,1,game);
 	rightArrow = loadImage("images/buttons/r-arrow.png", 1,1,game);
@@ -240,13 +249,18 @@ int main(void)
 	moveImageTo(forgeButton,(forgeButton->w+10)*0,(upgradeButton->h+10));
 	moveImageTo(upgradeButton,(upgradeButton->w+10)*1,(upgradeButton->h+10));
 	moveImageTo(natureButton,(natureButton->w+10)*2,(natureButton->h+10));
+	moveImageTo(clothingButton,(natureButton->w+10)*2,(natureButton->h+10));
 	moveImageTo(metalButton,(natureButton->w+10)*2,(natureButton->h+10));
+	moveImageTo(plasticButton,(natureButton->w+10)*2,(natureButton->h+10));
 	
 	itemList = getList("lists/itemList.txt",game);
 	housey = background->h-119;
 	
 	enemylist=malloc(sizeof(Enemy*)*enemylistcapacity);
-	
+	setToFrame(background,0,loop);
+	setToFrame(bkgrnd,loop,0);
+	setToFrame(flumfImg,loop,0);
+	setToLoop(itemList,loop);
 	pile = initPile(loadImage("images/pile.png",1,1,game),2560,background->h-30,itemList);
 	sortList(itemList);
 	moveImageTo(newGameImage,game->boundingBox.w/4-newGameImage->w/2,game->boundingBox.h*1/8);
@@ -413,10 +427,78 @@ int main(void)
 				}
 				activatedUpgrades[upgrade-1] = 1;
 			}
+			else if(usefulstrcmp(temp,"clothing-upgrade"))
+			{
+				int upgrade;
+				sscanf(temp,"clothing-upgrade %d",&upgrade);
+				clothingList->list[upgrade-1]->unlocked=0;
+				activatedClothing[upgrade-1] = 1;
+				if(upgrade==1)
+				{
+					if(activatedClothing[1]==1 && activatedClothing[2]==1)
+					{
+						palImage = loadImage("images/pals/1hgs.png",8,3,game);
+					}
+					else if(activatedClothing[1]==1)
+					{
+						palImage = loadImage("images/pals/1hg.png",8,3,game);
+					}
+					else if(activatedClothing[2]==1)
+					{
+						palImage = loadImage("images/pals/1hs.png",8,3,game);
+					}
+					else
+					{
+						palImage = loadImage("images/pals/1h.png",8,3,game);
+					}
+					chutzpahBonus+=250;
+					
+				}
+				else if(upgrade==2)
+				{
+					if(activatedClothing[0]==1 && activatedClothing[2]==1)
+					{
+						palImage = loadImage("images/pals/1hgs.png",8,3,game);
+					}
+					else if(activatedClothing[0]==1)
+					{
+						palImage = loadImage("images/pals/1hg.png",8,3,game);
+					}
+					else if(activatedClothing[2]==1)
+					{
+						palImage = loadImage("images/pals/1gs.png",8,3,game);
+					}
+					else
+					{
+						palImage = loadImage("images/pals/1g.png",8,3,game);
+					}
+					wonderBonus += 2;
+				}
+				else if(upgrade==3)
+				{
+					if(activatedClothing[1]==1 && activatedClothing[0]==1)
+					{
+						palImage = loadImage("images/pals/1hgs.png",8,3,game);
+					}
+					else if(activatedClothing[1]==1)
+					{
+						palImage = loadImage("images/pals/1gs.png",8,3,game);
+					}
+					else if(activatedClothing[0]==1)
+					{
+						palImage = loadImage("images/pals/1hs.png",8,3,game);
+					}
+					else
+					{
+						palImage = loadImage("images/pals/1s.png",8,3,game);
+					}
+					moxieBonus+=5;
+				}
+			}
 			else if(usefulstrcmp(temp,"item"))
 			{
-				sscanf(temp,"item %s",tempItem);
-				putInPile(pile,getItemByName(tempItem,itemList));
+				sscanf(temp,"item %s %d",tempItem,&i);
+				putMultInPile(pile,getItemByName(tempItem,itemList),i);
 			}
 			else if(usefulstrcmp(temp,"house"))
 			{
@@ -440,16 +522,25 @@ int main(void)
 				{
 					specialization = 1;
 					lockTier(3,recipeList);
+					unlockTier(4,recipeList);
+					growBuilding = houseList[houseNum-1]->image;
+					unlockUpgradeTier(7,upgradeList);
+					wonderModifier++;
 				}
 				if(houseList[houseNum-1]->type == 5)
 				{
 					specialization = 2;
 					lockTier(3,recipeList);
+					unlockTier(4,recipeList);
+					growBuilding = houseList[houseNum-1]->image;
+					unlockUpgradeTier(6,upgradeList);
+					wonderModifier++;
 				}
 				if(houseList[houseNum-1]->type == 6)
 				{
 					specialization = 4;
 					lockTier(3,recipeList);
+					unlockTier(4,recipeList);
 					growBuilding = houseList[houseNum-1]->image;
 					unlockUpgradeTier(3,upgradeList);
 					upgradeList->list[8]->unlocked =0;
@@ -459,8 +550,18 @@ int main(void)
 				{
 					specialization = 3;
 					lockTier(3,recipeList);
+					unlockTier(4,recipeList);
 					growBuilding = houseList[houseNum-1]->image;
 					unlockUpgradeTier(4,upgradeList);
+					wonderModifier++;
+				}
+				if(houseList[houseNum-1]->type == 11)
+				{
+					specialization = 5;
+					lockTier(3,recipeList);
+					unlockTier(4,recipeList);
+					growBuilding = houseList[houseNum-1]->image;
+					unlockUpgradeTier(5,upgradeList);
 					wonderModifier++;
 				}
 				if(houseList[houseNum-1]->type == 8)
@@ -499,6 +600,7 @@ int main(void)
 	{
 		exit = 1;
 	}
+
 	
 	//initial setup alignment	
 	moveImageTo(background,0,0);
@@ -768,8 +870,10 @@ int main(void)
 				}
 				for(j=0;j<houseList[i]->size;j++)
 				{
-
-					adventurerDo(houseList[i]->pals[j], game, itemList, houseList[i]->image->x + houseList[i]->image->w/2,houseList[i]->image->y,&currOutPals,&redrawHouses,&visEggSize,moxieBonus,scrollmin,ambulationTowerList);
+					if(houseList[i]->pals[j]->type==1)
+						adventurerDo(houseList[i]->pals[j], game, itemList, houseList[i]->image->x + houseList[i]->image->w/2,houseList[i]->image->y,&currOutPals,&redrawHouses,&visEggSize,moxieBonus,scrollmin,ambulationTowerList,palImage);
+					else if(houseList[i]->pals[j]->type==2)
+						adventurerDo(houseList[i]->pals[j], game, itemList, houseList[i]->image->x + houseList[i]->image->w/2,houseList[i]->image->y,&currOutPals,&redrawHouses,&visEggSize,moxieBonus,scrollmin,ambulationTowerList,palImageFight);
 					if(houseList[i]->pals[j]->type == 1)
 					{
 						if(houseList[i]->pals[j]->status == 5 && houseList[i]->pals[j]->item==NULL )
@@ -1253,11 +1357,30 @@ int main(void)
 				}
 				clickable = 1;
 			}
+			else if(!inMenu && isClicked(&clothingButton->destPos,game,4) && specialization == 2)
+			{
+				if(game->chain->mouse == 1 )
+				{
+				inMenu = 10;
+				game->chain->mouse = 2;
+				}
+				clickable = 1;
+			}
 			else if(!inMenu && isClicked(&metalButton->destPos,game,4) && specialization == 3)
 			{
 				if(game->chain->mouse == 1 )
 				{
 				inMenu = 8;
+				game->chain->mouse = 2;
+				}
+				clickable = 1;
+			}
+			
+			else if(!inMenu && isClicked(&plasticButton->destPos,game,4) && specialization == 1)
+			{
+				if(game->chain->mouse == 1 )
+				{
+				inMenu = 11;
 				game->chain->mouse = 2;
 				}
 				clickable = 1;
@@ -1572,6 +1695,8 @@ int main(void)
 						setToFrame(redo,!growAutoReplant,0);
 						drawImage(redo,game);
 					}
+					flyingItems = processFlyingItems(flyingItems,game);
+
 					if(growItem == NULL)
 					{
 						
@@ -1581,6 +1706,8 @@ int main(void)
 						grabbed = drawPileDetailSub(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,0,0,0,1,0,&maxscroll, &clickable,&selectionInfo ,selectionMenu, ordering);
 						if(grabbed!=NULL)
 						{
+							flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w,game->boundingBox.h/2,i*4);
+
 							grabbed->size--;
 							growItem = grabbed->item;
 							growTimer = 400;
@@ -1612,7 +1739,7 @@ int main(void)
 								if(game->chain->mouse==1)
 								{
 									moveImageTo(growItem->image,growBuilding->x,growBuilding->y+growBuilding->h-growItem->image->h);
-								addItemToLooseList(looseList,copyItem(growItem),2,0);
+									addItemToLooseList(looseList,copyItem(growItem),2,0);
 									addItemToLooseList(looseList,copyItem(growItem),2,0);
 									if(growAutoReplant)
 									{
@@ -1747,12 +1874,15 @@ int main(void)
 					grabbed = drawPileDetail(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,&maxscroll, &clickable,&selectionInfo ,selectionMenu, ordering);
 					if(grabbed!=NULL)
 					{
+						flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w,game->boundingBox.h/2,i*4);
+
 						grabbed->size--;
 						fuelLevel += grabbed->item->value;
 						grabbed=NULL;
 					}
 					
-					
+					flyingItems = processFlyingItems(flyingItems,game);
+
 					drawImage(close,game);
 					setLayer(game,2);
 				}
@@ -1969,6 +2099,151 @@ int main(void)
 					clearLayer(game);
 					drawImage(close,game);
 				}
+				else if (inMenu == 10)
+				{
+					setLayer(game,4);
+					clearLayer(game);
+					drawBackgroundTile(game,bkgrnd);
+					if(isClicked(&close->destPos,game,4))
+					{
+						if(game->chain->mouse==1)
+						{
+							inMenu = 0;
+							game->chain->mouse = 2;
+							redrawMenu = 1;
+						}
+						clickable = 1;
+					}
+					craft = drawUpgrades(clothingList,game,font,recipeImg,recipeBlack,itemList,pile,&scrolly, &canScroll,tinyResources,levels, &maxscroll, &clickable);
+					drawImage(close,game);
+					if(game->chain->mouse==1 && isClicked(&close->destPos,game,4))
+					{
+						game->chain->mouse = 2;
+					}
+					else if(craft>0)
+					{
+						activatedClothing[craft-1] = 1;
+						Mix_PlayChannel(1,event, 0);
+						clothingList->list[craft-1]->unlocked=0;
+						if(craft==1)
+						{
+							if(activatedClothing[1]==1 && activatedClothing[2]==1)
+							{
+								palImage = loadImage("images/pals/1hgs.png",8,3,game);
+							}
+							else if(activatedClothing[1]==1)
+							{
+								palImage = loadImage("images/pals/1hg.png",8,3,game);
+							}
+							else if(activatedClothing[2]==1)
+							{
+								palImage = loadImage("images/pals/1hs.png",8,3,game);
+							}
+							else
+							{
+								palImage = loadImage("images/pals/1h.png",8,3,game);
+							}
+							chutzpahBonus+=250;
+							
+						}
+						else if(craft==2)
+						{
+							if(activatedClothing[0]==1 && activatedClothing[2]==1)
+							{
+								palImage = loadImage("images/pals/1hgs.png",8,3,game);
+							}
+							else if(activatedClothing[0]==1)
+							{
+								palImage = loadImage("images/pals/1hg.png",8,3,game);
+							}
+							else if(activatedClothing[2]==1)
+							{
+								palImage = loadImage("images/pals/1gs.png",8,3,game);
+							}
+							else
+							{
+								palImage = loadImage("images/pals/1g.png",8,3,game);
+							}
+							wonderBonus += 2;
+						}
+						else if(craft==3)
+						{
+							if(activatedClothing[1]==1 && activatedClothing[0]==1)
+							{
+								palImage = loadImage("images/pals/1hgs.png",8,3,game);
+							}
+							else if(activatedClothing[1]==1)
+							{
+								palImage = loadImage("images/pals/1gs.png",8,3,game);
+							}
+							else if(activatedClothing[0]==1)
+							{
+								palImage = loadImage("images/pals/1hs.png",8,3,game);
+							}
+							else
+							{
+								palImage = loadImage("images/pals/1s.png",8,3,game);
+							}
+							moxieBonus+=5;
+						}
+						
+						craft=0;
+					}
+					if(!upgradesAvailable(clothingList))
+					{
+						redrawMenu =1;
+						inMenu=0;
+					}
+					setLayer(game,2);
+				}
+				else if(inMenu == 11)
+				{
+					setLayer(game,4);
+					clearLayer(game);
+					if(isClicked(&close->destPos,game,4))
+					{
+						if(game->chain->mouse==1)
+						{
+							inMenu = 0;
+							game->chain->mouse = 2;
+							redrawMenu = 1;
+						}
+						clickable = 1;
+					}
+					drawBackgroundTile(game,bkgrnd);
+					moveImageTo(redo,game->boundingBox.w-20-redo->w,close->h+20);
+					/*if(growCanAutoReplant)
+					{
+						if(isClicked(&redo->destPos,game,4))
+						{
+							if(game->chain->mouse==1)
+							{
+								growAutoReplant = !growAutoReplant;
+								game->chain->mouse = 2;
+							}
+							clickable = 1;
+						}
+						setToFrame(redo,!growAutoReplant,0);
+						drawImage(redo,game);
+					}*/
+					flyingItems = processFlyingItems(flyingItems,game);
+					grabbed = drawPileDetailSingle(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,&maxscroll, &clickable,&selectionInfo ,selectionMenu, ordering,"flumf-coin");
+					if(grabbed!=NULL)
+					{
+						
+						flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w,game->boundingBox.h/2,i*4);
+
+						grabbed->size--;
+						growItem = grabbed->item;
+						growTimer = 400;
+					}
+
+					
+					
+					
+					drawImage(close,game);
+					setLayer(game,2);
+				}
 
 			}
 			if(!inMenu)
@@ -1986,6 +2261,10 @@ int main(void)
 						drawImage(upgradeButton,game);
 					if(hasForge)
 						drawImage(forgeButton,game);
+					if(specialization == 1)
+						drawImage(plasticButton,game);
+					if(specialization == 2)
+						drawImage(clothingButton,game);
 					if(specialization == 3)
 						drawImage(metalButton,game);
 					if(specialization == 4)
@@ -2024,6 +2303,7 @@ int main(void)
 			drawBackgroundTile(game,halfGrey);
 			moveImageTo(settingsBackground,game->boundingBox.w/2-settingsBackground->w/2,0);
 			drawImage(settingsBackground,game);
+			moveImageTo(exitButton,game->boundingBox.w/2-exitButton->w/2,settingsBackground->y+200);
 			drawImage(exitButton,game);
 			drawImage(close,game);
 		
@@ -2283,6 +2563,13 @@ int main(void)
 			if(activatedUpgrades[i] == 1)
 			{
 				fprintf(savefile,"upgrade %d\n",i+1);
+			}
+		}
+		for(i=0;i<clothingList->size;i++)
+		{
+			if(activatedClothing[i] == 1)
+			{
+				fprintf(savefile,"clothing-upgrade %d\n",i+1);
 			}
 		}
 

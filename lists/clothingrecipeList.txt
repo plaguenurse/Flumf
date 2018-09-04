@@ -1,3 +1,3 @@
-2-Hats,images/craftables/2hats.png,1,bow,1,spool,1
-glasses,images/craftables/glasses.png,1,tape,2,paperclip,2
-4-socks,images/craftables/4socks.png,1,sock,2
+Hats,Keep your pals nice stylish and warm,1,%image,images/craftables/hats.png,bow,1,spool,1
+Glasses,Help your pals see things better when they're searching for stuff,1,%image,images/craftables/glasses.png,tape,2,paperclip,2,%levels,1000,0,2000,0,0
+Socks,help keep your pals warm also allowing them to slip along the ground faster,1,%image,images/craftables/socks.png,sock,2,%levels,0,0,4000,0,0

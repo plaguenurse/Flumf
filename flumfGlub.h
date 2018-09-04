@@ -60,6 +60,7 @@ typedef struct Upgrade
 	char ** nameList;
 	int * numList;
 	char * desc;
+	Image * image;
 	int size;
 	int levels[5];
 	int unlocked;
@@ -144,23 +145,6 @@ typedef struct RecipeList
 } RecipeList;
 
 
-typedef struct Clothing
-{
-	Image * image;
-	int type;
-	int id;
-	int moxie;
-	int chutzpah;
-	int wonder;
-} Clothing;
-
-typedef struct ClothingRack
-{
-	Clothing ** list;
-	int size;
-	int type;
-} ClothingRack;
-
 typedef struct Adventurer
 {
 	Image * image;
@@ -185,10 +169,6 @@ typedef struct Adventurer
 	int posToXnext;
 	int posToYnext;
 	int advancedMove;
-
-	Clothing * hat;
-	Clothing * head;
-	Clothing * feet;
 	
 } Adventurer;
 
@@ -262,9 +242,9 @@ Adventurer * newAdventurer(int type, Game * game);
 void giveAdventurerNewItem(Adventurer * pal, Object * item);
 void giveAdventurerItem(Adventurer * pal, Item * item);
 void giveAdventurerNewItemByName(Adventurer * pal, char * itemName, ObjectList * list);
-void drawAdventurer(Adventurer * pal, Game * game);
+void drawAdventurer(Adventurer * pal, Game * game, Image * palImage);
 void drawAdventurerAtPoint(Adventurer * pal, Game * game,int x, int y);
-void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs, int moxieBonus, int scrollmin,AmbulationTowerList * ambulationList);
+void adventurerDo(Adventurer * pal, Game * game, ObjectList * list, int x, int y,int* currOutPals, char * redraw, int* eggs, int moxieBonus, int scrollmin,AmbulationTowerList * ambulationList, Image * palImage);
 House * newHouseByName(Game * game, int x, int y, char * name);
 House * newHouse(Game * game, int x, int y, int type);
 
@@ -286,25 +266,17 @@ void drawFeedBackground(Game * game, Image * bkgrnd, Image * flumf, Image * menu
 int dirtyTwoExponent(int power);
 int dirtyLogTwo(int value);
 int generateRandomLogVal(int maxVal);
-Clothing * newClothing(Image * image, int type, int id);
-Clothing * givePalNewHat(Clothing * hat, Adventurer * pal);
-Clothing * givePalNewHead(Clothing * head, Adventurer * pal);
-Clothing * givePalNewFeet(Clothing * feet, Adventurer * pal);
 int getChutzpah(Adventurer * pal);
 int getMoxie(Adventurer * pal, int moxieBonus);
 int getWonder(Adventurer * pal);
 Image * getImageByName(char * item, ObjectList * list);
-void addClothes(Clothing * clothes, ClothingRack * rack);
-Clothing * suckClothes(int n, ClothingRack * rack);
 ProductionQueue * initProdQueue(void);
 void processItemQueue(Item * item, ProductionQueue * queue);
 House ** checkQueueHouse(ProductionQueue * queue, House ** houseList, int * houseNum);
-void checkQueueClothing(ProductionQueue * queue, ClothingRack * hatRack, ClothingRack * headRack, ClothingRack * feetRack);
 void removeFromQueue(ProductionQueue * queue,int i);
 int removeNextItemQueue(ProductionQueue * queue,Item * item);
 void removeItemFromQueue(PQueue * queue,int i);
 char usefulstrcmp(char* input, char * match);
-Clothing * dupeClothing(Clothing * clothes);
 void unlockTier(int tier, RecipeList * list);
 void lockTier(int tier, RecipeList * list);
 void drawLevels(int* levels, Image * levelBar, Game * game, Image * background, Image* bottomInfo, Font * font);
@@ -337,6 +309,7 @@ void deletePileItem(PileItem * item);
 PileItem * drawPileDetailSub(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image * tinyResources,char plastic,char fabric,char metal,char nature, char tech,int * scrollMax, int* clickable, int * selection,Image *selectionMenu,Image * ordering);
 PileItem * drawPileDetail(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image* tinyResources, int * scrollMax, int* clickable, int * sortandconsume,Image *selectionMenu,Image * ordering);
 void putInPile(Pile * pile,Item * item);
+void putMultInPile(Pile * pile,Item * item,int num);
 Item * copyItem(Item * item);
 Item * takeItemFromPile(Pile * pile);
 int canCraft(Recipe * recipe, Pile * pile, ObjectList * list, int*levels);
@@ -345,7 +318,6 @@ void deleteItemsUpgrade(Upgrade * upgrade, Pile * pile, ObjectList * list);
 int drawRecipes(RecipeList * recipeList,Game * game,Font * font,Image * recipeBackground,Image * recipeBlack,ObjectList * items, Pile * pile, int * scrolly, int * canScroll, Image * tinyResources, int * levels, int * scrollmax, int* clickable);
 int drawUpgrades(UpgradeList * upgradeList,Game * game,Font * font,Image * upgradeBackground,Image * upgradeBlack,ObjectList * items, Pile * pile, int * scrolly, int * canScroll, Image * tinyResources, int * levels, int * scrollmax, int* clickable);
 void addHouseToQueue(ProductionQueue * queue, House * house,Recipe * recipe, Pile * pile, ObjectList * list);
-void addClothingToQueue(ProductionQueue * queue, Clothing ** clothes,Recipe * recipe, Pile * pile, ObjectList * list, int clotheNum);
 void itemSave(Pile * pile, FILE * savefile);
 int canRemove(House ** houseList, int houseNum,House * movingHouse);
 int getStatHeight(int * levels, Image * tinyResources);
@@ -371,8 +343,9 @@ FlyingItem * newFlyingItem(FlyingItem * list,Image * image,int startX, int start
 FlyingItem * processFlyingItems(FlyingItem * first,Game * game);
 FlyingItem * clearFlyingItems(FlyingItem * item);
 //needs work
+void setToLoop(ObjectList* list,int loop);
 //to-do
-
+PileItem * drawPileDetailSingle(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image* tinyResources, int * scrollMax, int* clickable, int * selection,Image *selectionMenu,Image * ordering, char* name);
 
 
 #endif

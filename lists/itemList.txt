@@ -16,6 +16,7 @@ duck,images/objects/duck.png,3,1000,200,500,0,0,0,0
 earbud,images/objects/earbud.png,3,120,60,0,0,0,0,180
 egg,images/objects/egg.png,3,500,1200,0,0,0,500,0
 eraser,images/objects/eraser.png,2,225,50,50,0,0,0,0
+flumf-coin,images/objects/flumf-coin.png,9,150,150,0,0,0,0,0
 fork,images/objects/fork.png,3,75,50,0,0,60,0,0
 game-cart,images/objects/game-cart.png,4,800,600,50,0,0,0,250
 gear,images/objects/gear.png,2,1000,250,0,0,900,0,0
