@@ -18,7 +18,8 @@ egg,images/objects/egg.png,3,500,1200,0,0,0,500,0
 eraser,images/objects/eraser.png,2,225,50,50,0,0,0,0
 flumf-coin,images/objects/flumf-coin.png,9,150,150,0,0,0,0,0
 fork,images/objects/fork.png,3,75,50,0,0,60,0,0
-game-cart,images/objects/game-cart.png,4,800,600,50,0,0,0,250
+game-cart,images/objects/game-cart.png,3,800,600,50,0,0,0,450
+game-toy,images/objects/game-toy.png,3,1200,700,150,0,0,0,1250
 gear,images/objects/gear.png,2,1000,250,0,0,900,0,0
 glass,images/objects/glass.png,4,700,250,500,0,0,0,0
 glue,images/objects/glue.png,5,400,60,250,0,0,0,0
@@ -68,7 +69,7 @@ toy-car,images/objects/toycar.png,2,400,200,250,0,40,0,0
 tuna-can,images/objects/tuna-can.png,3,650,1200,0,0,200,40,0
 umbrella,images/objects/umbrella.png,3,200,100,30,0,0,20,0
 usb-drive,images/objects/usb.png,2,300,250,0,0,10,0,300
-video-tape,images/objects/video-tape.png,4,2000,100,400,0,0,0,200
+video-tape,images/objects/video-tape.png,3,2000,100,400,0,0,0,200
 virtual-pet,images/objects/virtual-pet.png,4,2000,1000,200,0,100,0,1500
 walkie-talkie,images/objects/walkie-talkie.png,1,850,1250,0,0,500,0,800
 whistle,images/objects/whistle.png,2,150,100,0,0,100,0,0

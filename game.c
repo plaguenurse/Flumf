@@ -23,14 +23,16 @@ int main(void)
 	Image* smolEgg, * bkgrnd, * flumfAnim, * error;
 	Image *newGameImage, *continueGameImage, *mainMenu, *forgeInfo;
 	Image * adventureButton,*craftButton,*leftArrow,*rightArrow,*upArrow,*downArrow, *close, *forgeButton, *natureButton,*clothingButton;
-	Image * statusButton, *flumfButton, *upgradeButton, *moveButton, * metalButton, *plasticButton;
+	Image * statusButton, *flumfButton, *upgradeButton, *moveButton, * metalButton, *plasticButton, *techButton;
 	Image * levelBar, *forgeSlice, *forgeLeftMenu, *tinyResources, *palLevelOutline, * ordering, *redo;
 	Image * poof;
 	Image * palImage;
 	Image * palImageFight;
 	int flumfAuto = 0;
 	Image * dirtPile, *growing, *grown, *fuelGauge;
+	Image * gumball, * gumballCover, *gumballTurner;
 	Image * mineGear1, * mineGear2, * mineBlock;
+	Image * gameBox;
 	Item * minetemp = NULL;
 	SDL_Rect tempRect;
 	int growTimer = 0;
@@ -39,7 +41,7 @@ int main(void)
 	AmbulationTowerList * ambulationTowerList;
 	int flumfEatDelay = 0;
 	FlyingItem * flyingItems = NULL;
-	int loop = 3;
+	int loop = 0;
 	double musicVol = 1;
 	double sfxVol = 0.75;
 	
@@ -52,6 +54,9 @@ int main(void)
 	int growAutoReplant = 0;
 	int growTimerMax = 400;
 	int growTimerMods = 0;
+	
+	int gumballTimer = 0;
+	int gumballDelay = 0;
 	
 	int levels[5]={0};
 
@@ -97,6 +102,7 @@ int main(void)
 	int houseNum = 0;
 
 	int volClick = 0;
+	miniCookieGame * cookieGame;
 
 	long long int flumfEntropy = 0;
 	double flumfDesire = 16;
@@ -206,6 +212,7 @@ int main(void)
 	forgeButton = loadImage("images/buttons/forge.png",1,1,game);
 	statusButton = loadImage("images/buttons/party.png",1,1,game);
 	natureButton = loadImage("images/buttons/nature.png",1,1,game);
+	techButton = loadImage("images/buttons/tech.png",1,1,game);
 	clothingButton = loadImage("images/buttons/clothing.png",1,1,game);
 	metalButton = loadImage("images/buttons/metal.png",1,1,game);
 	plasticButton = loadImage("images/buttons/plastic.png",1,1,game);
@@ -222,14 +229,18 @@ int main(void)
 	selectionMenu = loadImage("images/buttons/selection.png", 3, 2,game);
 	ordering = loadImage("images/buttons/ordering.png", 2, 2,game);
 	
+	gumball = loadImage("images/gumball.png",2,1,game);
+	gumballCover = loadImage("images/gumball-covering.png",1,1,game);
+	gumballTurner = loadImage("images/gumball-handle.png",1,1,game);
+	
 	dirtPile = loadImage("images/dirt-pile.png", 1,1,game);
 	growing = loadImage("images/leaf1.png", 1,1,game);
 	grown = loadImage("images/leaf2.png", 1,1,game);
 	fuelGauge = loadImage("images/fluid-level.png", 1,8,game);
 	mineGear1 = loadImage("images/gear1.png", 1,1,game);
 	mineGear2 = loadImage("images/gear2.png", 1,1,game);
-	mineBlock = loadImage("images/mine.png", 1,1,game);;
-	
+	mineBlock = loadImage("images/mine.png", 1,1,game);
+	gameBox = loadImage("images/gameFlumf.png",1,1,game);
 
 	font = newFont(loadImage("images/font.png",13,5,game));
 
@@ -249,6 +260,7 @@ int main(void)
 	moveImageTo(forgeButton,(forgeButton->w+10)*0,(upgradeButton->h+10));
 	moveImageTo(upgradeButton,(upgradeButton->w+10)*1,(upgradeButton->h+10));
 	moveImageTo(natureButton,(natureButton->w+10)*2,(natureButton->h+10));
+	moveImageTo(techButton,(natureButton->w+10)*2,(natureButton->h+10));
 	moveImageTo(clothingButton,(natureButton->w+10)*2,(natureButton->h+10));
 	moveImageTo(metalButton,(natureButton->w+10)*2,(natureButton->h+10));
 	moveImageTo(plasticButton,(natureButton->w+10)*2,(natureButton->h+10));
@@ -616,7 +628,7 @@ int main(void)
 	moveLayer(game,-scrollmin,0,1);	
 	moveLayer(game,-scrollmin,0,2);
 	moveLayer(game,-scrollmin,0,3);
-
+	cookieGame = initMiniCookieGame(0, 0,game);
 	
 	//Drawing background layer
 	setLayer(game,0);
@@ -792,7 +804,21 @@ int main(void)
 						{
 							if(pendingItem == NULL)
 							{
-								pendingItem = getItemGroup(itemList,generateRandomLogVal(ceil(wonderTeaSet/currExploringPals)+1+wonderModifier)-2,chutzpahGravyBoat);
+								if(specialization == 1)
+								{
+									if(rand()%100==0)
+									{
+										pendingItem = getItemByName("flumf-coin",itemList);
+									}
+									else
+									{
+										pendingItem = getItemGroup(itemList,generateRandomLogVal(ceil(wonderTeaSet/currExploringPals)+1+wonderModifier)-2,chutzpahGravyBoat);
+									}
+								}
+								else
+								{
+									pendingItem = getItemGroup(itemList,generateRandomLogVal(ceil(wonderTeaSet/currExploringPals)+1+wonderModifier)-2,chutzpahGravyBoat);
+								}
 								pendingChutzpah = pendingItem->mass;
 								houseList[i]->pals[j]->item = pendingItem;
 								avgmoxie += getMoxie(houseList[i]->pals[j],moxieBonus);
@@ -1251,6 +1277,7 @@ int main(void)
 				}
 			}
 			//Mine Behaviour End
+			//Gumball Behaviour Start
 			
 			//ProcessAnimations
 			effects = processEffects(effects,game);
@@ -1353,6 +1380,15 @@ int main(void)
 				if(game->chain->mouse == 1 )
 				{
 				inMenu = 5;
+				game->chain->mouse = 2;
+				}
+				clickable = 1;
+			}
+			else if(!inMenu && isClicked(&techButton->destPos,game,4) && specialization == 5)
+			{
+				if(game->chain->mouse == 1 )
+				{
+				inMenu = 12;
 				game->chain->mouse = 2;
 				}
 				clickable = 1;
@@ -2032,11 +2068,19 @@ int main(void)
 									{
 										specialization = 1;
 										lockTier(3,recipeList);
+										unlockTier(4,recipeList);
+										growBuilding = houseList[houseNum-1]->image;
+										unlockUpgradeTier(7,upgradeList);
+										wonderModifier++;
 									}
 									if(movingHouse->type== 5)
 									{
 										specialization = 2;
 										lockTier(3,recipeList);
+										unlockTier(4,recipeList);
+										growBuilding = houseList[houseNum-1]->image;
+										unlockUpgradeTier(6,upgradeList);
+										wonderModifier++;
 									}
 									if(movingHouse->type== 6)
 									{
@@ -2054,6 +2098,15 @@ int main(void)
 										lockTier(3,recipeList);
 										growBuilding = houseList[houseNum-1]->image;
 										unlockUpgradeTier(4,upgradeList);
+										wonderModifier++;
+									}
+									if(movingHouse->type == 11)
+									{
+										specialization = 5;
+										lockTier(3,recipeList);
+										unlockTier(4,recipeList);
+										growBuilding = houseList[houseNum-1]->image;
+										unlockUpgradeTier(5,upgradeList);
 										wonderModifier++;
 									}
 									if(movingHouse->type == 8)
@@ -2212,35 +2265,88 @@ int main(void)
 					}
 					drawBackgroundTile(game,bkgrnd);
 					moveImageTo(redo,game->boundingBox.w-20-redo->w,close->h+20);
-					/*if(growCanAutoReplant)
+					if(gumballTimer>0)
 					{
-						if(isClicked(&redo->destPos,game,4))
-						{
-							if(game->chain->mouse==1)
-							{
-								growAutoReplant = !growAutoReplant;
-								game->chain->mouse = 2;
-							}
-							clickable = 1;
-						}
-						setToFrame(redo,!growAutoReplant,0);
-						drawImage(redo,game);
-					}*/
+						gumballTimer--;
+					}
+					if(gumballTimer == 0 && gumballDelay>0)
+					{
+						rotateImage(gumballTurner,45);
+						animateSpeed(gumball,4);
+						gumballDelay--;
+					}
+					
+					drawImage(menuImg,game);
+					moveImageTo(gumball,game->boundingBox.w/2+gumball->w/2,game->boundingBox.h/2-gumball->h/4);
+					moveImageTo(gumballCover,gumball->x+gumball->w/2-gumballCover->w/2,gumball->y+gumball->h-gumballCover->h);
+					moveImageTo(gumballTurner,gumball->x+gumball->w/2-gumballTurner->w/2,gumball->y+gumball->h-gumballCover->h+4);
+					drawImage(gumball,game);
+					
 					flyingItems = processFlyingItems(flyingItems,game);
+				
+					drawImage(gumballTurner,game);
 					grabbed = drawPileDetailSingle(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,&maxscroll, &clickable,&selectionInfo ,selectionMenu, ordering,"flumf-coin");
 					if(grabbed!=NULL)
 					{
-						
-						flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w,game->boundingBox.h/2,i*4);
-
-						grabbed->size--;
-						growItem = grabbed->item;
-						growTimer = 400;
+						if((selectionInfo & 3)==1)
+						{
+							consumption = 1;
+						}
+						else if((selectionInfo & 3)==2)
+						{
+							if(grabbed->size<10)
+								consumption = grabbed->size;
+							else
+								consumption = 10;
+						}
+						else if((selectionInfo & 3)==3)
+						{
+							consumption = grabbed->size;
+						}
+						for(i=0;i<consumption;i++)
+						{
+							flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,gumballCover->x+gumballCover->w/2,gumballCover->y,i*4);
+							
+							grabbed->size--;
+							
+							growItem =getItemGroup(itemList,rand()%6,9999);
+							
+							moveImageTo(growItem->image,growBuilding->x,growBuilding->y+growBuilding->h-growItem->image->h);
+							flyingItems = newFlyingItem(flyingItems,copyItem(growItem)->image,gumballCover->x+gumballCover->w-growItem->image->h,gumballCover->y,game->boundingBox.w,gumballCover->y-95,i*4+(gumballCover->x+gumballCover->w/2-game->chain->vx)/7);
+							if(gumballTimer == 0)
+								gumballTimer = (gumballCover->x+gumballCover->w/2-game->chain->vx)/7;
+							gumballDelay+=8;
+							addItemToLooseList(looseList,growItem,2,0);
+						}
+						grabbed = NULL;
 					}
 
 					
 					
 					
+					drawImage(close,game);
+					setLayer(game,2);
+				}
+				else if(inMenu == 12)
+				{
+					setLayer(game,4);
+					clearLayer(game);
+					if(isClicked(&close->destPos,game,4))
+					{
+						if(game->chain->mouse==1)
+						{
+							inMenu = 0;
+							game->chain->mouse = 2;
+							redrawMenu = 1;
+						}
+						clickable = 1;
+					}
+					drawBackgroundTile(game,bkgrnd);
+					moveImageTo(gameBox,game->boundingBox.w/2-gameBox->w/2,game->boundingBox.h-gameBox->h);
+					drawImage(gameBox,game);
+					cookieGame->x = gameBox->x + 104;
+					cookieGame->y = gameBox->y + 96;
+					processCookieGame(cookieGame,game);
 					drawImage(close,game);
 					setLayer(game,2);
 				}
@@ -2269,6 +2375,8 @@ int main(void)
 						drawImage(metalButton,game);
 					if(specialization == 4)
 						drawImage(natureButton,game);
+					if(specialization == 5)
+						drawImage(techButton,game);
 					if(game->layerList[0]->scrollDest.x < -scrollmin)
 						drawImage(leftArrow,game);
 					if(-game->layerList[0]->scrollDest.x < game->layerList[0]->scrollDest.w-game->boundingBox.w)

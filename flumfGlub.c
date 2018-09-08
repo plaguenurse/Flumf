@@ -1288,6 +1288,14 @@ House * newHouseByName(Game * game, int x, int y, char * name)
 		house->pals = NULL;
 		house->type = 10;
 	}
+	else if(strcmp(name,"Game_Station")==0)
+	{
+		house->image = loadImage("images/buildings/game-station.png",3,1,game);
+		house->capacity = 0;
+		house->size = 0;
+		house->pals = NULL;
+		house->type = 11;
+	}
 	moveImageTo(house->image,x,y);
 	house->status = 0;
 	house->pending = 0;
@@ -1369,6 +1377,13 @@ House * newHouse(Game * game, int x, int y, int type)
 		house->size = 0;
 		house->pals = NULL;
 	}
+	else if(type == 11)
+	{
+		house->image = loadImage("images/buildings/game-station.png",3,1,game);
+		house->capacity = 0;
+		house->size = 0;
+		house->pals = NULL;
+	}
 	moveImageTo(house->image,x,y);
 	house->type = type;
 	house->status = 0;
@@ -1420,7 +1435,10 @@ char * houseFromType(int type)
 	else if(type == 10)
 	{
 		return "Attack_Tower";
-		
+	}
+	else if(type == 11)
+	{
+		return "Game_Station";
 	}
 	return NULL;
 }
@@ -1926,6 +1944,23 @@ PileItem * drawPileDetailSingle(Pile * pile, Game * game, Font * font, int * off
 	
 		}
 	}
+	
+	for(i=0;i<3;i++)
+	{
+		moveImageTo(selectionMenu,game->boundingBox.w/2+7+i*selectionMenu->w,game->boundingBox.h-selectionMenu->h);
+		setToFrame(selectionMenu,i,((*selection&3)==(i+1)));
+		drawImage(selectionMenu,game);
+		if(isClicked(&selectionMenu->destPos,game,game->currLayer))
+		{
+			if(game->chain->mouse == 1 )
+			{
+				game->chain->mouse = 2;
+				*selection = (*selection & ~3)+i+1;
+			}
+			*clickable = 1;
+		}
+	}
+	
 	*scrollMax = *offsety-rect.y +game->boundingBox.h-20;
 	if(rect.y > *offsety + game->boundingBox.h-20)
 	{
@@ -3609,4 +3644,62 @@ FlyingItem * clearFlyingItems(FlyingItem * item)
 	}
 	else 
 		return NULL;
+}
+miniCookieGame * initMiniCookieGame(int x, int y, Game * game)
+{
+	miniCookieGame * retval = malloc(sizeof(miniCookieGame));
+	int i = 0, j = 0,r = 0,rVal;
+	retval->x = x;
+	retval->y = y;
+	retval->w = 276;
+	retval->h = 216;
+	retval->background = loadImage("images/mini-game/background.png",1,1,game);
+	retval->cookies = loadImage("images/mini-game/cookies.png",5,1,game);
+	retval->board = malloc(sizeof(char*)*5);
+	for(i=0;i<5;i++)
+	{
+		retval->board[i]=calloc(sizeof(char),5);
+		for(j=0;j<5;j++)
+		{
+			r=5;
+
+			if(i>0)
+			{
+				if(j>0 && retval->board[i-1][j] != retval->board[i][j-1])
+				{
+					r-=2;
+				}
+				else 
+					r--;
+			}
+			else if(j>0)
+				r--;
+			rVal = rand()%r;
+			
+			while((i>0 && rVal == retval->board[i-1][j]) || (j>0 && rVal==retval->board[i][j-1]))
+			{
+				rVal++;
+			}
+			retval->board[i][j] = rVal;
+		}
+	}
+	return retval;
+}
+void processCookieGame(miniCookieGame * cookieGame,Game * game)
+{
+	int i = 0, j = 0;
+	moveImageTo(cookieGame->cookies,72+cookieGame->x,69+cookieGame->y);
+	moveImageTo(cookieGame->background,cookieGame->x,cookieGame->y);
+	drawImage(cookieGame->background,game);
+	for(i=0;i<5;i++)
+	{
+		
+		for(j=0;j<5;j++)
+		{
+			setToFrame(cookieGame->cookies,cookieGame->board[i][j],0);
+			drawImage(cookieGame->cookies,game);
+			moveImage(cookieGame->cookies,cookieGame->cookies->w+3,0);
+		}
+		moveImage(cookieGame->cookies,-(cookieGame->cookies->w+3)*5,cookieGame->cookies->h+3);
+	}	
 }

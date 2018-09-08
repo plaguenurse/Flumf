@@ -233,6 +233,18 @@ typedef struct ItemList
 	int size;
 } ItemList;
 
+typedef struct miniCookieGame
+{
+	int x,y,w,h;
+	char** board;
+	char dir;
+	char pos;
+	int timer;
+	int timerMax;
+	int score;
+	Image * background;
+	Image * cookies;
+} miniCookieGame;
 
 ObjectList* freeList(ObjectList* list);
 ObjectList* getList(char * fileLocation,Game * game);
@@ -342,10 +354,12 @@ Effect * clearTimeredEffects(Effect * effect);
 FlyingItem * newFlyingItem(FlyingItem * list,Image * image,int startX, int startY,int endX, int endY, int delay);
 FlyingItem * processFlyingItems(FlyingItem * first,Game * game);
 FlyingItem * clearFlyingItems(FlyingItem * item);
-//needs work
-void setToLoop(ObjectList* list,int loop);
-//to-do
 PileItem * drawPileDetailSingle(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image* tinyResources, int * scrollMax, int* clickable, int * selection,Image *selectionMenu,Image * ordering, char* name);
 
+//needs work
+void setToLoop(ObjectList* list,int loop);
+void processCookieGame(miniCookieGame * cookieGame,Game * game);
+miniCookieGame * initMiniCookieGame(int x, int y, Game * game);
+//to-do
 
 #endif
