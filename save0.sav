@@ -1,518 +1,518 @@
-time 1536443180
-sound 0.000000 0.000000
+time 1536974591
+sound 0.610526 0.336842
 eggs 0
 flumf 210771 227441.099683
-resources 10130 9000 95815 54650 10000
+resources 130680 12000 367315 165650 65050
 house House 150 2460 521
-pal 1 787 1
-pal 2 820 2
-pal 1 747 1
-pal 1 752 1
-pal 1 716 1
-pal 1 791 2
-pal 1 778 2
-pal 1 733 1
-pal 2 694 1
-pal 2 712 1
-pal 2 832 3
-pal 2 827 3
-pal 1 803 3
-pal 2 767 2
-pal 1 793 3
-pal 1 655 1
-pal 1 735 2
-pal 1 774 3
-pal 1 676 1
-pal 2 782 3
-pal 2 660 1
-pal 1 699 2
-pal 1 719 2
-pal 1 715 2
-pal 1 750 3
-pal 2 677 2
-pal 1 616 1
-pal 1 630 1
-pal 1 686 2
-pal 1 663 2
+pal 1 1243 1
+pal 2 1316 2
+pal 1 1194 1
+pal 1 1195 1
+pal 1 1152 1
+pal 1 1260 2
+pal 1 1232 2
+pal 1 1156 1
+pal 2 1114 1
+pal 2 1124 1
+pal 2 1298 3
+pal 2 1285 3
+pal 1 1254 3
+pal 2 1190 2
+pal 1 1233 3
+pal 1 1044 1
+pal 1 1144 2
+pal 1 1201 3
+pal 1 1059 1
+pal 2 1201 3
+pal 2 1032 1
+pal 1 1089 2
+pal 1 1101 2
+pal 1 1093 2
+pal 1 1148 3
+pal 2 1052 2
+pal 1 962 1
+pal 1 974 1
+pal 1 1052 2
+pal 1 1026 2
+pal 1 942 1
+pal 1 1070 3
+pal 2 1084 3
+pal 1 977 2
+pal 1 983 2
+pal 1 1043 3
+pal 2 1050 3
+pal 1 1032 3
+pal 1 954 2
+pal 2 943 2
+pal 1 938 2
+pal 1 993 3
+pal 1 914 2
+pal 1 867 1
+pal 1 966 3
+pal 1 861 1
+pal 2 898 2
+pal 2 902 2
+pal 2 895 2
+pal 1 866 2
+pal 2 917 3
+pal 1 907 3
+pal 1 868 2
+pal 1 820 1
+pal 2 792 1
+pal 1 799 1
+pal 2 865 3
+pal 1 770 1
+pal 1 879 3
+pal 1 837 2
+pal 1 855 3
+pal 1 759 1
+pal 1 751 1
+pal 1 812 2
+pal 1 814 2
+pal 1 737 1
+pal 1 800 2
+pal 1 737 1
+pal 1 722 1
+pal 1 821 3
+pal 1 717 1
+pal 2 781 3
+pal 1 792 3
+pal 1 729 1
+pal 1 741 2
+pal 1 724 1
+pal 1 702 1
+pal 2 743 2
+pal 1 713 1
+pal 1 773 3
+pal 1 767 3
+pal 1 684 1
+pal 1 721 2
+pal 1 672 1
+pal 2 715 2
+pal 1 737 3
+pal 1 727 3
+pal 1 649 1
+pal 1 701 3
+pal 1 662 1
+pal 1 675 2
+pal 1 708 3
+pal 2 640 1
+pal 1 654 2
+pal 1 665 2
+pal 1 654 2
+pal 1 600 1
+pal 2 628 2
 pal 1 605 1
-pal 1 696 3
-pal 2 715 3
-pal 1 633 2
-pal 1 643 2
-pal 1 691 3
-pal 2 702 3
-pal 1 688 3
-pal 1 621 2
-pal 2 612 2
-pal 1 614 2
-pal 1 658 3
-pal 1 594 2
-pal 1 564 1
-pal 1 637 3
-pal 1 567 1
-pal 2 589 2
-pal 2 595 2
-pal 2 593 2
-pal 1 566 2
-pal 2 607 3
-pal 1 602 3
-pal 1 574 2
-pal 1 543 1
-pal 2 516 1
-pal 1 525 1
-pal 2 569 3
-pal 1 499 1
-pal 1 587 3
-pal 1 560 2
-pal 1 571 3
-pal 1 497 1
-pal 1 493 1
-pal 1 542 2
-pal 1 546 2
-pal 1 482 1
-pal 1 538 2
-pal 1 486 1
-pal 1 474 1
-pal 1 555 3
-pal 1 472 1
-pal 2 519 3
+pal 1 597 2
+pal 1 621 3
+pal 1 592 1
+pal 1 579 1
+pal 1 581 2
+pal 1 610 3
+pal 1 565 2
+pal 2 572 1
+pal 1 588 3
+pal 1 577 2
+pal 1 574 3
+pal 1 515 2
+pal 1 521 1
+pal 1 545 3
+pal 1 527 3
+pal 1 513 2
+pal 1 514 2
+pal 1 479 1
 pal 1 533 3
-pal 1 488 1
-pal 1 493 2
-pal 1 485 1
-pal 1 468 1
-pal 2 498 2
-pal 1 480 1
-pal 1 525 3
-pal 1 523 3
-pal 1 454 1
-pal 1 487 2
-pal 1 443 1
-pal 2 484 2
-pal 1 500 3
-pal 1 494 3
-pal 1 425 1
-pal 1 471 3
-pal 1 447 1
-pal 1 448 2
-pal 1 482 3
-pal 2 430 1
-pal 1 436 2
+pal 1 493 1
+pal 2 506 3
+pal 1 509 2
+pal 2 493 3
+pal 1 453 1
+pal 1 509 3
+pal 1 467 2
+pal 1 459 2
+pal 1 460 2
+pal 2 486 3
+pal 1 455 2
+pal 1 439 2
 pal 1 451 2
-pal 1 442 2
-pal 1 396 1
-pal 2 421 2
-pal 1 404 1
-pal 1 392 2
-pal 1 417 3
-pal 1 397 1
-pal 1 387 1
-pal 1 385 2
-pal 1 411 3
-pal 1 374 2
-pal 2 386 1
-pal 1 392 3
-pal 1 392 2
-pal 1 385 3
-pal 1 362 2
-pal 1 372 1
-pal 1 387 3
-pal 1 371 3
-pal 1 364 2
-pal 1 368 2
-pal 1 338 1
-pal 1 386 3
-pal 1 356 1
-pal 2 362 3
-pal 1 369 2
-pal 2 355 3
-pal 1 320 1
-pal 1 373 3
-pal 1 334 2
-pal 1 331 2
-pal 1 331 2
-pal 2 358 3
-pal 1 329 2
-pal 1 315 2
-pal 1 328 2
-pal 1 333 3
-pal 1 309 2
-pal 1 302 2
-pal 1 295 1
-pal 1 309 3
-pal 1 315 1
-pal 1 311 2
-pal 1 317 3
-pal 1 291 2
-pal 1 307 2
-pal 1 305 1
-pal 1 309 3
-pal 2 324 3
-pal 2 301 3
-pal 1 305 2
-pal 1 280 1
-pal 1 298 3
-pal 1 273 1
-pal 1 293 3
+pal 1 457 3
+pal 1 431 2
+pal 1 423 2
+pal 1 412 1
+pal 1 428 3
+pal 1 432 1
+pal 1 428 2
+pal 1 435 3
+pal 1 404 2
+pal 1 420 2
+pal 1 417 1
+pal 1 422 3
+pal 2 437 3
+pal 2 411 3
+pal 1 415 2
+pal 1 388 1
+pal 1 407 3
+pal 1 379 1
+pal 1 403 3
 house Forge 0 2334 521
 house Upgrade 0 2474 432
 house Shack 50 2351 432
-pal 1 505 3
-pal 2 496 3
-pal 1 487 3
-pal 2 470 2
-pal 1 475 2
-pal 1 451 2
-pal 1 453 2
-pal 1 440 2
-pal 1 422 2
-pal 1 416 2
-pal 1 438 3
-pal 2 370 1
-pal 1 376 1
-pal 1 394 2
-pal 1 370 1
-pal 2 393 3
-pal 2 409 3
-pal 1 374 3
-pal 1 346 1
-pal 1 379 3
-pal 1 366 3
-pal 2 346 3
-pal 2 349 2
-pal 1 336 3
-pal 2 313 2
-pal 2 352 3
-pal 1 345 3
-pal 1 316 2
-pal 1 301 2
-pal 1 296 3
-pal 1 325 3
-pal 1 301 3
-pal 2 293 1
-pal 1 292 3
-pal 1 309 3
-pal 1 281 3
-pal 2 280 3
-pal 1 250 1
-pal 1 244 1
-pal 1 243 1
-pal 1 252 1
-pal 1 231 1
-pal 1 228 2
-pal 1 236 3
-pal 2 221 2
-pal 1 220 2
-pal 1 214 2
-pal 2 224 3
-pal 2 210 1
-pal 1 204 1
+pal 1 775 3
+pal 2 749 3
+pal 1 731 3
+pal 2 699 2
+pal 1 701 2
+pal 1 673 2
+pal 1 663 2
+pal 1 643 2
+pal 1 620 2
+pal 1 606 2
+pal 1 626 3
+pal 2 548 1
+pal 1 545 1
+pal 1 562 2
+pal 1 532 1
+pal 2 552 3
+pal 2 564 3
+pal 1 525 3
+pal 1 491 1
+pal 1 522 3
+pal 1 463 3
+pal 2 439 3
+pal 2 437 2
+pal 1 419 3
+pal 2 388 2
+pal 2 426 3
+pal 1 415 3
+pal 1 385 2
+pal 1 365 2
+pal 1 358 3
+pal 1 382 3
+pal 1 356 3
+pal 2 345 1
+pal 1 341 3
+pal 1 355 3
+pal 1 323 3
+pal 2 322 3
+pal 1 289 1
+pal 1 281 1
+pal 1 278 1
+pal 1 285 1
+pal 1 263 1
+pal 1 259 2
+pal 1 266 3
+pal 2 250 2
+pal 1 247 2
+pal 1 237 2
+pal 2 246 3
+pal 2 231 1
+pal 1 223 1
 house Shack 50 2354 343
-pal 2 230 1
-pal 1 231 2
-pal 1 237 1
-pal 1 233 3
-pal 2 256 3
-pal 1 215 1
-pal 2 205 2
-pal 1 215 2
-pal 1 203 1
-pal 1 219 2
-pal 2 215 3
-pal 1 218 2
-pal 1 197 1
-pal 1 213 3
+pal 2 247 1
+pal 1 248 2
+pal 1 253 1
+pal 1 245 3
+pal 2 268 3
+pal 1 225 1
+pal 2 214 2
+pal 1 224 2
 pal 1 212 1
-pal 1 210 1
-pal 1 195 1
-pal 1 203 2
-pal 1 184 2
-pal 1 185 2
-pal 2 220 3
-pal 1 195 1
-pal 1 172 1
-pal 1 179 1
-pal 1 215 3
-pal 2 196 3
-pal 2 180 1
-pal 1 196 1
-pal 1 183 3
-pal 1 205 2
-pal 1 182 1
-pal 2 196 2
-pal 1 196 2
-pal 1 198 3
-pal 1 202 3
-pal 1 172 2
-pal 1 181 2
-pal 1 174 2
-pal 1 169 2
-pal 1 164 1
-pal 1 201 2
-pal 1 204 3
-pal 2 175 2
-pal 2 181 2
-pal 1 176 2
-pal 1 179 2
-pal 2 203 3
-pal 1 178 3
-pal 1 169 3
-pal 1 194 2
-house Shack 50 2255 521
-pal 1 206 2
-pal 1 215 2
-pal 1 199 1
-pal 1 182 1
-pal 1 185 1
-pal 1 185 2
-pal 1 183 2
-pal 1 192 1
-pal 1 222 3
-pal 2 181 2
-pal 1 187 1
-pal 1 195 3
-pal 1 210 3
-pal 2 195 2
-pal 1 213 3
-pal 1 167 1
-pal 1 196 1
-pal 1 205 3
-pal 1 172 1
-pal 1 161 1
+pal 1 227 2
+pal 2 223 3
+pal 1 225 2
+pal 1 203 1
+pal 1 218 3
+pal 1 217 1
+pal 1 215 1
+pal 1 200 1
+pal 1 208 2
 pal 1 189 2
-pal 1 201 2
-pal 1 183 2
-pal 1 207 3
-pal 1 198 3
-pal 1 185 1
-pal 1 195 3
-pal 1 189 1
-pal 1 159 1
-pal 1 180 1
-pal 1 176 3
-pal 1 182 1
-pal 2 152 1
-pal 1 181 2
-pal 1 175 3
-pal 2 172 1
-pal 1 193 3
-pal 1 167 3
+pal 1 190 2
+pal 2 225 3
+pal 1 200 1
+pal 1 177 1
 pal 1 183 1
-pal 1 172 1
-pal 1 199 3
-pal 1 186 2
-pal 2 151 1
-pal 2 173 1
-pal 1 147 1
-pal 1 170 1
-pal 1 158 1
-pal 2 179 1
-pal 1 170 3
-pal 2 163 3
-house Shack 50 2252 432
-pal 1 167 2
-pal 1 175 3
-pal 1 189 3
-pal 1 155 1
-pal 1 168 3
-pal 1 181 1
-pal 1 175 1
-pal 1 163 1
-pal 1 192 3
-pal 2 197 3
-pal 2 161 1
-pal 1 161 2
-pal 1 179 3
-pal 2 154 1
-pal 2 174 2
-pal 1 183 3
-pal 1 150 1
+pal 1 219 3
+pal 2 200 3
+pal 2 184 1
+pal 1 200 1
 pal 1 187 3
-pal 2 145 1
-pal 1 177 2
-pal 1 168 1
-pal 1 172 1
-pal 1 175 3
-pal 1 174 1
-pal 1 154 3
+pal 1 209 2
+pal 1 186 1
+pal 2 200 2
+pal 1 200 2
+pal 1 202 3
+pal 1 206 3
+pal 1 176 2
+pal 1 185 2
+pal 1 178 2
+pal 1 172 2
+pal 1 167 1
+pal 1 204 2
+pal 1 207 3
+pal 2 178 2
+pal 2 184 2
+pal 1 179 2
+pal 1 182 2
+pal 2 206 3
+pal 1 181 3
+pal 1 172 3
+pal 1 197 2
+house Shack 50 2255 521
+pal 1 209 2
+pal 1 218 2
+pal 1 202 1
+pal 1 185 1
+pal 1 188 1
+pal 1 188 2
+pal 1 186 2
+pal 1 195 1
+pal 1 225 3
+pal 2 184 2
+pal 1 190 1
+pal 1 198 3
+pal 1 213 3
+pal 2 198 2
+pal 1 216 3
+pal 1 170 1
+pal 1 199 1
+pal 1 208 3
+pal 1 175 1
+pal 1 164 1
+pal 1 192 2
+pal 1 204 2
+pal 1 186 2
+pal 1 210 3
+pal 1 201 3
+pal 1 188 1
+pal 1 198 3
+pal 1 192 1
+pal 1 162 1
+pal 1 183 1
+pal 1 179 3
+pal 1 185 1
+pal 2 155 1
+pal 1 184 2
+pal 1 178 3
+pal 2 175 1
+pal 1 196 3
+pal 1 170 3
+pal 1 186 1
+pal 1 175 1
+pal 1 202 3
+pal 1 189 2
+pal 2 154 1
+pal 2 176 1
+pal 1 150 1
+pal 1 173 1
+pal 1 161 1
+pal 2 182 1
+pal 1 173 3
+pal 2 166 3
+house Shack 50 2252 432
+pal 1 170 2
+pal 1 178 3
+pal 1 192 3
+pal 1 158 1
+pal 1 171 3
+pal 1 184 1
+pal 1 178 1
+pal 1 166 1
+pal 1 195 3
+pal 2 200 3
+pal 2 164 1
 pal 1 164 2
 pal 1 182 3
-pal 1 165 2
-pal 1 161 2
-pal 1 161 2
-pal 2 160 1
 pal 2 157 1
-pal 1 157 2
-pal 2 168 2
-pal 1 169 3
-pal 2 151 3
-pal 1 150 3
-pal 2 146 2
-pal 2 165 1
-pal 1 136 1
-pal 1 160 1
-pal 2 147 2
-pal 1 157 3
-pal 1 166 3
-pal 1 154 3
-pal 1 165 3
-pal 1 144 2
-pal 1 158 1
-pal 1 147 2
-pal 1 145 1
-house Shack 50 2252 343
+pal 2 177 2
+pal 1 186 3
+pal 1 152 1
+pal 1 189 3
+pal 2 147 1
 pal 1 179 2
-pal 1 165 2
-pal 1 161 1
-pal 2 162 3
-pal 1 139 1
-pal 1 161 3
-pal 1 159 2
-pal 1 136 1
-pal 2 164 2
-pal 1 169 2
-pal 1 176 2
-pal 1 174 2
-pal 1 155 1
-pal 1 158 3
-pal 1 159 1
-pal 1 158 1
-pal 2 160 3
-pal 1 173 2
-pal 1 137 1
-pal 2 155 2
-pal 1 139 2
-pal 1 170 2
-pal 1 147 2
-pal 1 170 3
-pal 1 142 3
-pal 1 148 3
-pal 1 132 1
-pal 1 155 1
-pal 1 145 3
-pal 1 168 2
-pal 1 162 2
-pal 1 156 3
-pal 1 136 1
-pal 2 154 1
-pal 1 151 1
-pal 2 153 3
-pal 1 164 2
-pal 1 144 3
-pal 2 133 1
-pal 1 149 2
-pal 1 149 3
-pal 2 138 1
-pal 1 155 2
-pal 1 160 3
-pal 2 150 3
-pal 1 141 2
-pal 1 156 3
-pal 1 138 1
-pal 1 140 1
-pal 2 141 3
-house Shack 50 2112 521
-pal 2 173 3
-pal 1 144 2
-pal 1 163 2
-pal 1 171 2
-pal 1 180 3
-pal 1 162 3
-pal 2 154 2
-pal 1 166 1
-pal 1 149 2
-pal 1 155 3
-pal 1 174 3
-pal 1 139 1
-pal 1 135 1
-pal 1 171 2
-pal 1 149 1
-pal 1 160 1
-pal 1 174 3
-pal 1 138 2
-pal 1 145 1
-pal 2 147 3
-pal 1 159 2
+pal 1 170 1
+pal 1 174 1
 pal 1 176 3
-pal 1 160 3
-pal 1 136 2
-pal 1 157 2
-pal 1 139 2
-pal 1 143 3
-pal 2 150 1
-pal 1 126 1
-pal 1 139 2
-pal 2 129 1
-pal 1 150 3
-pal 1 148 1
-pal 1 147 3
-pal 1 143 2
-pal 1 122 1
-pal 2 154 3
+pal 1 175 1
 pal 1 155 3
-pal 1 133 2
-pal 1 146 2
-pal 1 161 3
-pal 2 153 3
+pal 1 165 2
+pal 1 183 3
+pal 1 166 2
+pal 1 162 2
+pal 1 162 2
+pal 2 161 1
+pal 2 158 1
+pal 1 158 2
+pal 2 169 2
+pal 1 170 3
+pal 2 152 3
+pal 1 151 3
+pal 2 147 2
+pal 2 166 1
+pal 1 137 1
+pal 1 161 1
+pal 2 148 2
+pal 1 158 3
+pal 1 167 3
+pal 1 155 3
+pal 1 166 3
 pal 1 145 2
-pal 1 128 1
-pal 1 142 1
-pal 2 153 3
-pal 2 137 2
-pal 1 135 2
+pal 1 159 1
+pal 1 148 2
+pal 1 146 1
+house Shack 50 2252 343
+pal 1 180 2
+pal 1 166 2
+pal 1 162 1
+pal 2 163 3
+pal 1 140 1
+pal 1 162 3
+pal 1 160 2
+pal 1 137 1
+pal 2 165 2
+pal 1 170 2
+pal 1 177 2
+pal 1 175 2
+pal 1 156 1
+pal 1 159 3
+pal 1 160 1
+pal 1 159 1
+pal 2 161 3
+pal 1 174 2
+pal 1 138 1
+pal 2 156 2
+pal 1 140 2
+pal 1 171 2
+pal 1 148 2
+pal 1 171 3
+pal 1 143 3
+pal 1 149 3
+pal 1 133 1
+pal 1 156 1
+pal 1 146 3
+pal 1 169 2
+pal 1 163 2
 pal 1 157 3
-pal 1 133 2
-house Shack 50 2356 254
-pal 1 124 2
-pal 1 123 2
+pal 1 137 1
+pal 2 155 1
+pal 1 152 1
+pal 2 154 3
+pal 1 165 2
+pal 1 145 3
+pal 2 134 1
+pal 1 150 2
+pal 1 150 3
+pal 2 139 1
+pal 1 156 2
+pal 1 161 3
+pal 2 151 3
+pal 1 142 2
 pal 1 157 3
-pal 1 158 3
-pal 2 155 3
-pal 1 123 2
-pal 1 131 2
-pal 1 137 3
-pal 1 158 3
-pal 1 127 1
-pal 1 139 3
-pal 1 122 1
-pal 1 142 1
-pal 2 133 3
-pal 2 153 2
-pal 1 155 3
-pal 1 117 2
-pal 1 114 1
-pal 1 147 3
-pal 1 121 2
-pal 1 116 1
-pal 1 130 2
+pal 1 139 1
 pal 1 141 1
-pal 1 128 2
-pal 1 117 2
-pal 1 127 3
-pal 1 129 2
+pal 2 142 3
+house Shack 50 2112 521
+pal 2 174 3
+pal 1 145 2
+pal 1 164 2
+pal 1 172 2
+pal 1 181 3
+pal 1 163 3
+pal 2 155 2
+pal 1 167 1
+pal 1 150 2
+pal 1 156 3
+pal 1 175 3
+pal 1 140 1
+pal 1 136 1
+pal 1 172 2
+pal 1 150 1
+pal 1 161 1
+pal 1 175 3
+pal 1 139 2
+pal 1 146 1
+pal 2 148 3
+pal 1 160 2
+pal 1 177 3
+pal 1 161 3
 pal 1 137 2
-pal 1 119 2
-pal 1 111 1
-pal 1 124 1
-pal 1 113 2
-pal 1 135 2
-pal 2 142 1
-pal 2 116 1
-pal 1 119 1
-pal 1 133 3
-pal 1 114 1
-pal 1 141 2
-pal 1 119 3
-pal 2 138 2
-pal 2 130 3
-pal 1 127 3
-pal 2 124 2
-pal 1 123 2
+pal 1 158 2
+pal 1 140 2
+pal 1 144 3
+pal 2 151 1
+pal 1 127 1
+pal 1 140 2
+pal 2 130 1
+pal 1 151 3
+pal 1 149 1
 pal 1 148 3
-pal 1 116 1
-pal 1 132 3
-pal 1 132 3
+pal 1 144 2
+pal 1 123 1
+pal 2 155 3
+pal 1 156 3
+pal 1 134 2
+pal 1 147 2
+pal 1 162 3
+pal 2 154 3
+pal 1 146 2
+pal 1 129 1
+pal 1 143 1
+pal 2 154 3
+pal 2 138 2
+pal 1 136 2
+pal 1 158 3
+pal 1 134 2
+house Shack 50 2356 254
+pal 1 125 2
+pal 1 124 2
+pal 1 158 3
+pal 1 159 3
+pal 2 156 3
+pal 1 124 2
+pal 1 132 2
+pal 1 138 3
+pal 1 159 3
+pal 1 128 1
 pal 1 140 3
+pal 1 123 1
+pal 1 143 1
+pal 2 134 3
+pal 2 154 2
+pal 1 156 3
+pal 1 118 2
+pal 1 115 1
+pal 1 148 3
+pal 1 122 2
+pal 1 117 1
+pal 1 131 2
+pal 1 142 1
+pal 1 129 2
+pal 1 118 2
+pal 1 128 3
+pal 1 130 2
+pal 1 138 2
+pal 1 120 2
+pal 1 112 1
+pal 1 125 1
+pal 1 114 2
+pal 1 136 2
+pal 2 143 1
+pal 2 117 1
+pal 1 120 1
+pal 1 134 3
+pal 1 115 1
+pal 1 142 2
+pal 1 120 3
+pal 2 139 2
+pal 2 131 3
+pal 1 128 3
+pal 2 125 2
+pal 1 124 2
+pal 1 149 3
+pal 1 117 1
+pal 1 133 3
+pal 1 133 3
+pal 1 141 3
 house Attack_Tower 30 2361 165
 pal 1 50 3
 pal 1 61 1
@@ -545,18 +545,18 @@ pal 1 64 3
 pal 1 57 1
 pal 1 77 3
 house Shack 50 2458 343
+pal 1 95 1
 pal 1 94 1
-pal 1 93 1
-pal 1 83 1
-pal 1 90 1
-pal 1 82 3
-pal 2 92 1
-pal 1 91 2
-pal 1 83 1
-pal 1 83 2
-pal 1 102 2
-pal 1 107 2
-pal 1 78 3
+pal 1 84 1
+pal 1 91 1
+pal 1 83 3
+pal 2 93 1
+pal 1 92 2
+pal 1 84 1
+pal 1 84 2
+pal 1 103 2
+pal 1 108 2
+pal 1 79 3
 pal 2 101 3
 pal 1 82 2
 pal 2 103 1
@@ -1125,79 +1125,79 @@ upgrade 6
 clothing-upgrade 1
 clothing-upgrade 2
 clothing-upgrade 3
-item acorn 67
-item battery 77
-item bell 45
-item bottle-cap 8
-item bow 2253
-item bowling_pin 66
-item bread 131
-item button 10
-item candy 1
-item cherries 43
-item coin 3
-item crayon 7
-item cup 3599
-item dice 0
-item duck 37
-item earbud 53
-item egg 1
-item eraser 6
+item acorn 132
+item battery 145
+item bell 97
+item bottle-cap 168
+item bow 5620
+item bowling_pin 167
+item bread 315
+item button 508
+item candy 42
+item cherries 88
+item coin 55
+item crayon 170
+item cup 6887
+item dice 169
+item duck 92
+item earbud 96
+item egg 50
+item eraser 186
 item flumf-coin 2
-item fork 71
-item game-cart 36
-item game-toy 0
-item gear 145
-item glass 50
-item glue 93
-item holiday-light 6
+item fork 120
+item game-cart 1
+item game-toy 40
+item gear 310
+item glass 3
+item glue 177
+item holiday-light 171
 item ingot 0
-item ipod 360
-item iron 38
-item jar 358
-item key 7
-item lighter 110
-item lipstick 7
-item loaf 40
-item lock 2
-item log 61
-item milk 36
-item nail 115
-item nail_clippers 1
-item needle 18
-item nut 2
-item orange 74
-item painting 47
-item paper-swan 41
-item paperclip 19
-item pencil 2
-item pizza 67
-item plastic-brick 4
-item ring 4
-item rope 69
-item rubber-band 198
-item santaman 128
-item scissors 2264
-item screwdriver 2236
-item shoe 37
-item sock 343
-item soda 355
-item soy-sauce 58
-item sponge 193
-item spool 13
-item strawberry 10
-item tack 144
-item tape 105
-item thermometer 51
-item thimble 3
-item tin-can 108
-item toothbrush 74
-item toy-car 104
-item tuna-can 62
-item umbrella 43
-item usb-drive 14
-item video-tape 49
-item virtual-pet 46
-item walkie-talkie 317
-item whistle 5
-item wrench 37
+item ipod 843
+item iron 2
+item jar 910
+item key 178
+item lighter 3461
+item lipstick 100
+item loaf 97
+item lock 77
+item log 154
+item milk 92
+item nail 3417
+item nail_clippers 102
+item needle 504
+item nut 78
+item orange 157
+item painting 2
+item paper-swan 97
+item paperclip 488
+item pencil 49
+item pizza 176
+item plastic-brick 78
+item ring 62
+item rope 119
+item rubber-band 379
+item santaman 283
+item scissors 5622
+item screwdriver 5483
+item shoe 106
+item sock 824
+item soda 838
+item soy-sauce 106
+item sponge 386
+item spool 542
+item strawberry 477
+item tack 3510
+item tape 3350
+item thermometer 106
+item thimble 57
+item tin-can 3490
+item toothbrush 139
+item toy-car 294
+item tuna-can 112
+item umbrella 99
+item usb-drive 193
+item video-tape 105
+item virtual-pet 121
+item walkie-talkie 846
+item whistle 188
+item wrench 4

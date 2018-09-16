@@ -1,6 +1,8 @@
 acorn,images/objects/acorn.png,3,100,400,0,0,0,250,0
 battery,images/objects/battery.png,4,900,1800,0,0,0,0,1000
 bell,images/objects/bell.png,3,600,200,0,0,300,0,0
+black_blocky,images/objects/black_blocky.png,8,0,0,0,0,0,0,0
+black_pointy,images/objects/black_pointy.png,8,0,0,0,0,0,0,0
 bottle-cap,images/objects/bottlecap.png,2,70,70,0,0,25,0,0
 bow,images/objects/bow.png,0,450,130,0,450,0,0,0
 bowling_pin,images/objects/bowling_pin.png,5,5000,5000,2500,0,0,2500,0

@@ -3580,7 +3580,7 @@ Effect * clearTimeredEffects(Effect * effect)
 		return NULL;
 }
 
-FlyingItem * newFlyingItem(FlyingItem * list,Image * image,int startX, int startY,int endX, int endY, int delay)
+FlyingItem * newFlyingItem(FlyingItem * list,Image * image,int startX, int startY,int endX, int endY, int delay, int dir)
 {
 	FlyingItem * temp,*retval;
 	
@@ -3593,6 +3593,7 @@ FlyingItem * newFlyingItem(FlyingItem * list,Image * image,int startX, int start
 	temp->endX = endX;
 	temp->delay = delay;
 	temp->endY = endY;
+	temp->dir = dir;
 	moveImageTo(temp->image,startX,startY);
 	retval = list;
 	if(list == NULL)
@@ -3616,10 +3617,18 @@ FlyingItem * processFlyingItems(FlyingItem * first,Game * game)
 		{
 			
 			rotateImage(temp->image,6);
-			moveImage(temp->image,7,0);
-			
-			moveImageTo(temp->image,temp->image->x,temp->startY+(temp->endY-temp->startY)*((temp->image->x-temp->startX*1.0)/(temp->endX-temp->startX)*1.0));
-			
+			if(temp->dir == 0)
+			{
+				moveImage(temp->image,7,0);
+				
+				moveImageTo(temp->image,temp->image->x,temp->startY+(temp->endY-temp->startY)*((temp->image->x-temp->startX*1.0)/(temp->endX-temp->startX)*1.0));
+			}
+			else if(temp->dir == 1)
+			{
+				moveImage(temp->image,0,-4);
+				
+				moveImageTo(temp->image,temp->startX+(temp->endX-temp->startX)*((temp->image->y-temp->startY*1.0)/(temp->endY-temp->startY)*1.0),temp->image->y);
+			}
 			
 			drawImage(temp->image,game);
 		}
@@ -3633,7 +3642,11 @@ FlyingItem * processFlyingItems(FlyingItem * first,Game * game)
 }
 FlyingItem * clearFlyingItems(FlyingItem * item)
 {
-	while(item!=NULL && item->image->x>item->endX)
+	while(item!=NULL && abs(item->image->x-item->endX)<7 && item->dir == 0)
+	{
+		item = item->next;
+	}
+	while(item!=NULL && abs(item->image->y-item->endY)<7 && item->dir == 1)
 	{
 		item = item->next;
 	}
@@ -3653,8 +3666,28 @@ miniCookieGame * initMiniCookieGame(int x, int y, Game * game)
 	retval->y = y;
 	retval->w = 276;
 	retval->h = 216;
+	retval->dir = 0;
+	retval->posX = -1;
+	retval->posY = -1;
+	retval->timer = 1000;
+	retval->timerMax = 1000;
+	retval->score = 0;
+	retval->gameStatus= 0;
+	retval->colRem = -1;
+	retval->rowRem = -1;
+	retval->winSound = Mix_LoadWAV("sounds/minigameWin.wav");
+	retval->loseSound = Mix_LoadWAV("sounds/minigameLose.wav");
+	retval->moveSound = Mix_LoadWAV("sounds/minigameMove.wav");
+	retval->eatSound = Mix_LoadWAV("sounds/minigameEat.wav");
 	retval->background = loadImage("images/mini-game/background.png",1,1,game);
-	retval->cookies = loadImage("images/mini-game/cookies.png",5,1,game);
+	retval->foreground = loadImage("images/mini-game/foreground.png",1,1,game);
+	retval->fuse = loadImage("images/mini-game/fuse.png",2,2,game);
+	retval->scoreBoard = loadImage("images/mini-game/score.png",2,2,game);
+	retval->cookies = loadImage("images/mini-game/cookies.png",5,2,game);
+	retval->start =loadImage("images/mini-game/start.png",1,1,game);
+	retval->win = loadImage("images/mini-game/win.png",1,1,game);
+	retval->lose = loadImage("images/mini-game/lose.png",1,1,game);
+	retval->menu = loadImage("images/mini-game/menu.png",1,1,game);
 	retval->board = malloc(sizeof(char*)*5);
 	for(i=0;i<5;i++)
 	{
@@ -3685,21 +3718,414 @@ miniCookieGame * initMiniCookieGame(int x, int y, Game * game)
 	}
 	return retval;
 }
-void processCookieGame(miniCookieGame * cookieGame,Game * game)
+void processCookieGame(miniCookieGame * cookieGame,Game * game, int * clickable, int * grabable)
 {
-	int i = 0, j = 0;
+	int i = 0, j = 0, sigma = 2,tempx,tempy,add = 0;
 	moveImageTo(cookieGame->cookies,72+cookieGame->x,69+cookieGame->y);
+	moveImageTo(cookieGame->menu,cookieGame->x,cookieGame->y);
+	moveImageTo(cookieGame->win,cookieGame->x,cookieGame->y);
+	moveImageTo(cookieGame->lose,cookieGame->x,cookieGame->y);
 	moveImageTo(cookieGame->background,cookieGame->x,cookieGame->y);
+	moveImageTo(cookieGame->foreground,cookieGame->x,cookieGame->y);
 	drawImage(cookieGame->background,game);
+	if(cookieGame->gameStatus == 0)
+	{
+		drawImage(cookieGame->menu,game);
+		moveImageTo(cookieGame->start,cookieGame->menu->x+155,cookieGame->menu->y+140);
+		drawImage(cookieGame->start,game);
+		if(isClicked(&cookieGame->start->destPos,game,game->currLayer))
+		{
+			*clickable = 1;
+			if(game->chain->mouse == 1)
+			{
+				game->chain->mouse = 2;
+				cookieGame->gameStatus = 1;
+			}
+		}
+		
+	}
+	else if (cookieGame->gameStatus == 1)
+	{
+		if(game->chain->mouse == 3)
+			*grabable = 1;
+		for(i=0;i<5;i++)
+		{
+			if( cookieGame->board[i][0] >= 0 &&
+				cookieGame->board[i][0] == cookieGame->board[i][1] &&
+				cookieGame->board[i][2] == cookieGame->board[i][1] &&
+				cookieGame->board[i][2] == cookieGame->board[i][3] &&
+				cookieGame->board[i][4] == cookieGame->board[i][3])
+			{
+				cookieGame->colRem = i;
+			}
+			else if( cookieGame->board[0][i] >= 0 &&
+				cookieGame->board[0][i] == cookieGame->board[1][i] &&
+				cookieGame->board[2][i] == cookieGame->board[1][i] &&
+				cookieGame->board[2][i] == cookieGame->board[3][i] &&
+				cookieGame->board[4][i] == cookieGame->board[3][i])
+			{
+				cookieGame->rowRem = i;
+				
+			}
+			if(cookieGame->dir == 0 && cookieGame->colRem==i)
+			{
+				cookieGame->colRem = -1;
+				Mix_PlayChannel(1,cookieGame->eatSound, 0);
+				cookieGame->board[i][0] = -1;
+				cookieGame->board[i][1] = -1;
+				cookieGame->board[i][2] = -1;
+				cookieGame->board[i][3] = -1;
+				cookieGame->board[i][4] = -1;
+				cookieGame->score++;
+				cookieGame->timer = cookieGame->timerMax;
+				add = 1;
+				
+				
+			}
+			else if(cookieGame->dir == 0 && cookieGame->rowRem==i)
+			{
+				cookieGame->rowRem = -1;
+				Mix_PlayChannel(1,cookieGame->eatSound, 0);
+				cookieGame->board[0][i] = -1;
+				cookieGame->board[1][i] = -1;
+				cookieGame->board[2][i] = -1;
+				cookieGame->board[3][i] = -1;
+				cookieGame->board[4][i] = -1;
+				cookieGame->score++;
+				cookieGame->timer = cookieGame->timerMax;
+				add = 1;
+			}
+		
+		}
+		if(add)
+		{
+			refillBoard(cookieGame);
+		}
+		if(game->chain->mouse == 3 && cookieGame->posX>=0 && cookieGame->posY>=0)
+		{
+			
+			if(cookieGame->dir == 1 && (abs(game->chain->vx)>sigma || abs(game->chain->vy)>sigma))
+			{
+				if (abs(game->chain->vx-cookieGame->clickX)>abs(game->chain->vy-cookieGame->clickY))
+				{
+					cookieGame->dir = 2;//Horizontal
+				}
+				else 
+				{
+					cookieGame->dir = 3;//Vertical				
+				}
+			}
+			if(cookieGame->dir == 2)
+			{
+				if (game->chain->vx-cookieGame->clickX > (cookieGame->cookies->w+3)/2)
+				{
+					Mix_PlayChannel(1,cookieGame->moveSound, 0);
+					cookieGame->rowRem = -1;
+					cookieGame->colRem = -1;
+					
+					cookieGame->posY = (cookieGame->posY-1);
+					if(cookieGame->posY<0)
+					{
+						cookieGame->posY = 4;
+					}
+					cookieGame->clickX +=cookieGame->cookies->w+3;
+					tempx = cookieGame->board[cookieGame->posX][4];
+					cookieGame->board[cookieGame->posX][4] = cookieGame->board[cookieGame->posX][3];
+					cookieGame->board[cookieGame->posX][3] = cookieGame->board[cookieGame->posX][2];
+					cookieGame->board[cookieGame->posX][2] = cookieGame->board[cookieGame->posX][1];
+					cookieGame->board[cookieGame->posX][1] = cookieGame->board[cookieGame->posX][0];
+					cookieGame->board[cookieGame->posX][0] = tempx;
+				}
+				else if (game->chain->vx-cookieGame->clickX < -(cookieGame->cookies->w+3)/2)
+				{
+					Mix_PlayChannel(1,cookieGame->moveSound, 0);
+					cookieGame->rowRem = -1;
+					cookieGame->colRem = -1;
+					cookieGame->posY = (cookieGame->posY+1);
+					if(cookieGame->posY>4)
+					{
+						cookieGame->posY = 0;
+					}
+					cookieGame->clickX -=cookieGame->cookies->w+3;
+					tempx = cookieGame->board[cookieGame->posX][0];
+					cookieGame->board[cookieGame->posX][0] = cookieGame->board[cookieGame->posX][1];
+					cookieGame->board[cookieGame->posX][1] = cookieGame->board[cookieGame->posX][2];
+					cookieGame->board[cookieGame->posX][2] = cookieGame->board[cookieGame->posX][3];
+					cookieGame->board[cookieGame->posX][3] = cookieGame->board[cookieGame->posX][4];
+					cookieGame->board[cookieGame->posX][4] = tempx;
+				}
+			}
+			else if(cookieGame->dir == 3)
+			{
+				if (game->chain->vy-cookieGame->clickY > (cookieGame->cookies->h+3)/2)
+				{
+					Mix_PlayChannel(1,cookieGame->moveSound, 0);
+					cookieGame->rowRem = -1;
+					cookieGame->colRem = -1;
+					cookieGame->posX = (cookieGame->posX-1);
+					if(cookieGame->posX<0)
+					{
+						cookieGame->posX = 4;
+					}
+					cookieGame->clickY +=cookieGame->cookies->h+3;
+					tempx = cookieGame->board[4][cookieGame->posY];
+					cookieGame->board[4][cookieGame->posY] = cookieGame->board[3][cookieGame->posY];
+					cookieGame->board[3][cookieGame->posY] = cookieGame->board[2][cookieGame->posY];
+					cookieGame->board[2][cookieGame->posY] = cookieGame->board[1][cookieGame->posY];
+					cookieGame->board[1][cookieGame->posY] = cookieGame->board[0][cookieGame->posY];
+					cookieGame->board[0][cookieGame->posY] = tempx;
+				}
+				else if (game->chain->vy-cookieGame->clickY < -(cookieGame->cookies->w+3)/2)
+				{
+					Mix_PlayChannel(1,cookieGame->moveSound, 0);
+					cookieGame->rowRem = -1;
+					cookieGame->colRem = -1;
+					cookieGame->posX = (cookieGame->posX+1);
+					if(cookieGame->posX>4)
+					{
+						cookieGame->posX = 0;
+					}
+					cookieGame->clickY -=cookieGame->cookies->h+3;
+					tempx = cookieGame->board[0][cookieGame->posY];
+					cookieGame->board[0][cookieGame->posY] = cookieGame->board[1][cookieGame->posY];
+					cookieGame->board[1][cookieGame->posY] = cookieGame->board[2][cookieGame->posY];
+					cookieGame->board[2][cookieGame->posY] = cookieGame->board[3][cookieGame->posY];
+					cookieGame->board[3][cookieGame->posY] = cookieGame->board[4][cookieGame->posY];
+					cookieGame->board[4][cookieGame->posY] = tempx;
+				}
+			}
+			for(i=0;i<5;i++)
+			{
+				if(cookieGame->dir == 2 && cookieGame->posX==i)
+						moveImage(cookieGame->cookies,game->chain->vx-cookieGame->clickX,0);
+				for(j=0;j<5;j++)
+				{
+					if(cookieGame->dir == 3 && cookieGame->posY==j)
+						moveImage(cookieGame->cookies,0,game->chain->vy-cookieGame->clickY);
+					
+					setToFrame(cookieGame->cookies,cookieGame->board[i][j],(cookieGame->colRem == i || cookieGame->rowRem == j));
+					if(cookieGame->dir == 2 && cookieGame->cookies->x<72+cookieGame->x)
+					{
+						tempx = cookieGame->cookies->x;
+						while (cookieGame->cookies->x<72+cookieGame->x)
+							moveImage(cookieGame->cookies,(cookieGame->cookies->w+3)*5,0);
+						drawImage(cookieGame->cookies,game);
+						if(cookieGame->cookies->x>72+cookieGame->x+(cookieGame->cookies->w+3)*4)
+						{
+							moveImage(cookieGame->cookies,-(cookieGame->cookies->w+3)*5,0);
+							drawImage(cookieGame->cookies,game);
+						}
+						moveImageTo(cookieGame->cookies,tempx,cookieGame->cookies->y);
+					}
+					else if(cookieGame->dir == 3 && cookieGame->cookies->y<69+cookieGame->y)
+					{
+						tempy = cookieGame->cookies->y;
+						while (cookieGame->cookies->y<69+cookieGame->y)
+							moveImage(cookieGame->cookies,0,(cookieGame->cookies->h+3)*5);
+						drawImage(cookieGame->cookies,game);
+						if(cookieGame->cookies->y>69+cookieGame->y+(cookieGame->cookies->h+3)*4)
+						{
+							moveImage(cookieGame->cookies,0,-(cookieGame->cookies->h+3)*5);
+							drawImage(cookieGame->cookies,game);
+						}
+						moveImageTo(cookieGame->cookies,cookieGame->cookies->x,tempy);
+					}
+					else if(cookieGame->dir == 2 && cookieGame->cookies->x>72+cookieGame->x+(cookieGame->cookies->w+3)*5)
+					{
+						tempx = cookieGame->cookies->x;
+						while (cookieGame->cookies->x>72+cookieGame->x+(cookieGame->cookies->w+3)*5)
+							moveImage(cookieGame->cookies,-(cookieGame->cookies->w+3)*5,0);
+						drawImage(cookieGame->cookies,game);
+						if(cookieGame->cookies->x>72+cookieGame->x+(cookieGame->cookies->w+3)*4)
+						{
+							moveImage(cookieGame->cookies,-(cookieGame->cookies->w+3)*5,0);
+							drawImage(cookieGame->cookies,game);
+						}
+						moveImageTo(cookieGame->cookies,tempx,cookieGame->cookies->y);
+					}
+					else if(cookieGame->dir == 3 && cookieGame->cookies->y>69+cookieGame->y+(cookieGame->cookies->h+3)*5)
+					{
+						tempy = cookieGame->cookies->y;
+						while (cookieGame->cookies->y>69+cookieGame->y+(cookieGame->cookies->h+3)*5)
+							moveImage(cookieGame->cookies,0,-(cookieGame->cookies->h+3)*5);
+						drawImage(cookieGame->cookies,game);
+						if(cookieGame->cookies->y>69+cookieGame->y+(cookieGame->cookies->h+3)*4)
+						{
+							moveImage(cookieGame->cookies,0,-(cookieGame->cookies->h+3)*5);
+							drawImage(cookieGame->cookies,game);
+						}
+						moveImageTo(cookieGame->cookies,cookieGame->cookies->x,tempy);
+					}
+					else
+						drawImage(cookieGame->cookies,game);
+					if(cookieGame->dir == 2)
+					{
+						if(cookieGame->cookies->x>72+cookieGame->x+(cookieGame->cookies->w+3)*4)
+						{
+							moveImage(cookieGame->cookies,-(cookieGame->cookies->w+3)*5,0);
+							drawImage(cookieGame->cookies,game);
+							moveImage(cookieGame->cookies,(cookieGame->cookies->w+3)*5,0);
+						}
+					}
+					else if(cookieGame->dir == 3)
+					{
+						if(cookieGame->cookies->y>69+cookieGame->y+(cookieGame->cookies->h+3)*4)
+						{
+							moveImage(cookieGame->cookies,0,-(cookieGame->cookies->h+3)*5);
+							drawImage(cookieGame->cookies,game);
+							moveImage(cookieGame->cookies,0,(cookieGame->cookies->h+3)*5);
+						}
+					}
+					moveImage(cookieGame->cookies,cookieGame->cookies->w+3,0);
+					if(cookieGame->dir == 3 && cookieGame->posY==j)
+						moveImage(cookieGame->cookies,0,-game->chain->vy+cookieGame->clickY);
+				}
+				if(cookieGame->dir == 2 && cookieGame->posX==i)
+					moveImage(cookieGame->cookies,-game->chain->vx+cookieGame->clickX,0);
+				
+				moveImage(cookieGame->cookies,-(cookieGame->cookies->w+3)*5,cookieGame->cookies->h+3);
+			}
+		}
+		else
+		{
+			if(cookieGame->dir != 0)
+			{
+				if(cookieGame->dir == 2)
+				{
+					
+				}
+				else if (cookieGame->dir == 3)
+				{
+					
+				}
+				cookieGame->posX = -1;
+				cookieGame->posY = -1;
+				cookieGame->dir = 0;
+			}
+			
+			
+			for(i=0;i<5;i++)
+			{
+				
+				for(j=0;j<5;j++)
+				{
+					if(isClicked(&cookieGame->cookies->destPos,game,game->currLayer))
+					{
+						*clickable = 1;
+						if(game->chain->mouse == 1)
+						{
+							game->chain->mouse = 3;
+							cookieGame->posX = i;
+							cookieGame->posY = j;
+							cookieGame->clickX = game->chain->vx;
+							cookieGame->clickY = game->chain->vy;
+							cookieGame->dir = 1;//Undecided
+							
+						}
+						
+					}
+					if(cookieGame->board[i][j]>=0)
+					{
+						setToFrame(cookieGame->cookies,cookieGame->board[i][j],(cookieGame->colRem == i || cookieGame->rowRem == j));
+						drawImage(cookieGame->cookies,game);
+					}
+					moveImage(cookieGame->cookies,cookieGame->cookies->w+3,0);
+				}
+				moveImage(cookieGame->cookies,-(cookieGame->cookies->w+3)*5,cookieGame->cookies->h+3);
+			}
+		}
+		drawImage(cookieGame->foreground,game);
+		moveImageTo(cookieGame->fuse,cookieGame->foreground->x+8,cookieGame->foreground->y+cookieGame->foreground->h-cookieGame->fuse->h);
+		setToFrame(cookieGame->fuse,1,1);
+		for(i=0;i<cookieGame->timer;i+=100)
+		{
+			drawImage(cookieGame->fuse,game);
+			moveImage(cookieGame->fuse,0,-cookieGame->fuse->h);
+		}
+		moveImage(cookieGame->fuse,0,20-((cookieGame->timer-1)%100)/5);
+		setToFrame(cookieGame->fuse,cookieGame->timer%10/5,0);
+		drawImage(cookieGame->fuse,game);
+		
+		moveImageTo(cookieGame->scoreBoard,cookieGame->foreground->x+234,cookieGame->foreground->y+cookieGame->foreground->h-cookieGame->scoreBoard->h);
+		for(i=0;i<15;i++)
+		{
+			setToFrame(cookieGame->scoreBoard,(cookieGame->score>= i+1),0);
+			drawImage(cookieGame->scoreBoard,game);
+			moveImage(cookieGame->scoreBoard,0,-cookieGame->scoreBoard->h);
+		}
+		setToFrame(cookieGame->scoreBoard,0,1);
+		drawImage(cookieGame->scoreBoard,game);
+		cookieGame->timer--;
+		if(cookieGame->timer <=0)
+		{
+			cookieGame->gameStatus = 3;
+			cookieGame->score = 0;
+			cookieGame->timer = cookieGame->timerMax;
+			Mix_PlayChannel(1,cookieGame->loseSound, 0);	
+		}
+		if(cookieGame->score == 15)
+		{
+			cookieGame->gameStatus = 2;
+			cookieGame->score = 0;
+			cookieGame->timer = cookieGame->timerMax;
+			Mix_PlayChannel(1,cookieGame->winSound, 0);
+		}
+	}
+	else if(cookieGame->gameStatus == 2)
+	{
+		drawImage(cookieGame->win,game);
+		moveImageTo(cookieGame->start,cookieGame->menu->x+160,cookieGame->menu->y+130);
+		if(isClicked(&cookieGame->start->destPos,game,game->currLayer))
+		{
+			*clickable = 1;
+			if(game->chain->mouse == 1)
+			{
+				game->chain->mouse = 2;
+				cookieGame->gameStatus = 1;
+			}
+		}
+		drawImage(cookieGame->start,game);
+	}
+	else if(cookieGame->gameStatus == 3)
+	{
+		drawImage(cookieGame->lose,game);
+		moveImageTo(cookieGame->start,cookieGame->menu->x+40,cookieGame->menu->y+150);
+		if(isClicked(&cookieGame->start->destPos,game,game->currLayer))
+		{
+			*clickable = 1;
+			if(game->chain->mouse == 1)
+			{
+				game->chain->mouse = 2;
+				cookieGame->gameStatus = 1;
+			}
+		}
+		drawImage(cookieGame->start,game);
+	}
+}
+void refillBoard(miniCookieGame * cookieGame)
+{
+	int i, j;
 	for(i=0;i<5;i++)
 	{
 		
 		for(j=0;j<5;j++)
 		{
-			setToFrame(cookieGame->cookies,cookieGame->board[i][j],0);
-			drawImage(cookieGame->cookies,game);
-			moveImage(cookieGame->cookies,cookieGame->cookies->w+3,0);
+			if (cookieGame->board[i][j]<0)
+			{
+				cookieGame->board[i][j]= rand()%5;
+			}
 		}
-		moveImage(cookieGame->cookies,-(cookieGame->cookies->w+3)*5,cookieGame->cookies->h+3);
-	}	
+	}
+}
+
+void clearToLoop(Pile * pile,int loop)
+{
+	PileItem *temp= pile->firstAlpha;
+	pile->total = 0;
+	while(temp!=NULL)
+	{
+		temp->size = 0;
+		setToFrame(temp->item->image,loop,0);
+		temp = temp->nextAlpha;
+	}
 }

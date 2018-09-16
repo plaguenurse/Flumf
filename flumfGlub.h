@@ -32,6 +32,7 @@ typedef struct FlyingItem
 	int endX;
 	int endY;
 	int delay;
+	int dir;
 	struct FlyingItem * next;
 }FlyingItem;
 
@@ -236,14 +237,32 @@ typedef struct ItemList
 typedef struct miniCookieGame
 {
 	int x,y,w,h;
+	
 	char** board;
 	char dir;
-	char pos;
+	char posX;
+	char posY;
+	int clickX;
+	int clickY;
 	int timer;
 	int timerMax;
 	int score;
+	int gameStatus;
+	int colRem;
+	int rowRem;
 	Image * background;
+	Image * foreground;
+	Image * fuse;
+	Image * scoreBoard;
 	Image * cookies;
+	Image * start;
+	Image * win;
+	Image * lose;
+	Image * menu;
+	Mix_Chunk * winSound;
+	Mix_Chunk * loseSound;
+	Mix_Chunk * moveSound;
+	Mix_Chunk * eatSound;
 } miniCookieGame;
 
 ObjectList* freeList(ObjectList* list);
@@ -351,15 +370,17 @@ int canTraverseToLevel(AmbulationTowerList * list, int levelTo, int currLevel, i
 Effect * newEffect(Effect * list,Image * image,int posX, int posY, int length);
 Effect * processEffects(Effect * first,Game * game);
 Effect * clearTimeredEffects(Effect * effect);
-FlyingItem * newFlyingItem(FlyingItem * list,Image * image,int startX, int startY,int endX, int endY, int delay);
+FlyingItem * newFlyingItem(FlyingItem * list,Image * image,int startX, int startY,int endX, int endY, int delay, int dir);
 FlyingItem * processFlyingItems(FlyingItem * first,Game * game);
 FlyingItem * clearFlyingItems(FlyingItem * item);
 PileItem * drawPileDetailSingle(Pile * pile, Game * game, Font * font, int * offsety, int * canScroll, int forge, Image* tinyResources, int * scrollMax, int* clickable, int * selection,Image *selectionMenu,Image * ordering, char* name);
 
 //needs work
 void setToLoop(ObjectList* list,int loop);
-void processCookieGame(miniCookieGame * cookieGame,Game * game);
+void processCookieGame(miniCookieGame * cookieGame,Game * game, int * clickable, int * grabable);
 miniCookieGame * initMiniCookieGame(int x, int y, Game * game);
+void refillBoard(miniCookieGame * cookieGame);
+void clearToLoop(Pile * pile,int loop);
 //to-do
 
 #endif

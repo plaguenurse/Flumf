@@ -8,4 +8,4 @@ Clothing_Station,images/buildings/clothes.png,3,jar,1,bow,2,needle,3,%levels,200
 Farm,images/buildings/farm.png,3,bread,2,umbrella,1,tin-can,1,%levels,0,0,200,8000,0
 Mine,images/buildings/mine.png,3,rope,1,gear,2,iron,1,lock,1,%levels,0,0,8000,0,200
 Game_Station,images/buildings/game-station.png,3,game-toy,1,video-tape,1,holiday-light,3,game-cart,1,%levels,200,0,0,0,8000
-Mystery Device,images/error.png,4,%levels,100000,100000,100000,100000,100000
+Mystery Device,images/error.png,4,black_pointy,100,black_blocky,10,%levels,10000,10000,10000,10000,10000

@@ -18,6 +18,8 @@ int main(void)
 	FILE* savefile;
 	int selectionInfo = 1;
 	int consumption = 0;
+	int specializations = 0;
+	int endTimer = 0;
 	Font * font;
 	Image* background, *flumfImg, *menuImg, * recipeImg,* recipeBlack;
 	Image* smolEgg, * bkgrnd, * flumfAnim, * error;
@@ -25,7 +27,7 @@ int main(void)
 	Image * adventureButton,*craftButton,*leftArrow,*rightArrow,*upArrow,*downArrow, *close, *forgeButton, *natureButton,*clothingButton;
 	Image * statusButton, *flumfButton, *upgradeButton, *moveButton, * metalButton, *plasticButton, *techButton;
 	Image * levelBar, *forgeSlice, *forgeLeftMenu, *tinyResources, *palLevelOutline, * ordering, *redo;
-	Image * poof;
+	Image * poof, *looplaser;
 	Image * palImage;
 	Image * palImageFight;
 	int flumfAuto = 0;
@@ -34,10 +36,17 @@ int main(void)
 	Image * mineGear1, * mineGear2, * mineBlock;
 	Image * gameBox;
 	Item * minetemp = NULL;
+	Item * enemyObject = NULL;
 	SDL_Rect tempRect;
 	int growTimer = 0;
 	Item * growItem = NULL;
 	Image * growBuilding= NULL;
+	Item * mineItem = NULL;
+	Image * mineBuilding= NULL;
+	Item * plasticItem = NULL;
+	Image * plasticBuilding= NULL;
+	Item * techItem = NULL;
+	Image * techBuilding= NULL;
 	AmbulationTowerList * ambulationTowerList;
 	int flumfEatDelay = 0;
 	FlyingItem * flyingItems = NULL;
@@ -133,6 +142,7 @@ int main(void)
 	House * movingHouse = NULL;
 	
 	int clickable = 0;
+	int grabable = 0;
 	int attackable = 0;
 	
 	int inMenu = 0;
@@ -157,7 +167,8 @@ int main(void)
 	
 	
 	
-	Mix_Chunk * backgroundMusic, * eating, * event, *whistle;
+	Mix_Chunk * backgroundMusic, * eating, * event, *whistle, *minigameMusic;
+	Mix_Chunk * attackSound, * buttonSound, *dieSound, *spawnSound, *loopSound;
 	
 	srand(time(NULL));
 	SDL_ShowCursor(SDL_DISABLE);
@@ -169,13 +180,16 @@ int main(void)
 	activatedUpgrades = calloc(sizeof(char),upgradeList->size);
 	activatedClothing = calloc(sizeof(char),clothingList->size);
 	
+	
 
 	palsPullingPals = malloc(sizeof(Adventurer*)*palpullcapacity);
 	
-	
+
 	
 	background = loadImage("images/background.png",1,4,game);
 	forgeInfo = loadImage("images/forge-types.png",5,1,game);
+	
+	looplaser = loadImage("images/looplaser.png",1,1,game);
 	
 	palLevelOutline = loadImage("images/levels-outline.png",1,1,game);
 	moveImageTo(palLevelOutline,0,10);
@@ -222,7 +236,7 @@ int main(void)
 	upArrow = loadImage("images/buttons/u-arrow.png", 1,1,game);
 	downArrow = loadImage("images/buttons/d-arrow.png", 1,1,game);
 	
-	cursor = loadImage("images/pointer.png", 3, 1,game);
+	cursor = loadImage("images/pointer.png", 4, 1,game);
 	mainMenu = loadImage("images/flumf-menu.png", 1, 1,game);
 	newGameImage = loadImage("images/newgame.png", 1, 1,game);
 	continueGameImage = loadImage("images/continuegame.png", 1, 2,game);
@@ -247,9 +261,17 @@ int main(void)
 	
 
 	backgroundMusic = Mix_LoadWAV("sounds/backgroundMusic.wav");
+	minigameMusic = Mix_LoadWAV("sounds/miniGameMusic.wav");
 	eating = Mix_LoadWAV("sounds/eating.wav");
 	whistle = Mix_LoadWAV("sounds/whistle.wav");
 	event = Mix_LoadWAV("sounds/aThing.wav");
+	attackSound = Mix_LoadWAV("sounds/attack.wav");
+	buttonSound = Mix_LoadWAV("sounds/buttonClick.wav");
+	dieSound = Mix_LoadWAV("sounds/die.wav");
+	spawnSound = Mix_LoadWAV("sounds/enemySpawn.wav");
+	loopSound = Mix_LoadWAV("sounds/gameLoop.wav");
+	
+	
 
 	moveImageTo(flumfImg, background->w-flumfImg->w,background->h-30-flumfImg->h);
 	
@@ -306,6 +328,7 @@ int main(void)
 		{
 			if(game->chain->mouse ==1)
 			{
+				Mix_PlayChannel(1,buttonSound, 0);
 				newGame=1;
 				game->chain->mouse =2;
 			}
@@ -315,6 +338,7 @@ int main(void)
 		{
 			if(game->chain->mouse ==1)
 			{
+				Mix_PlayChannel(1,buttonSound, 0);
 				newGame=0;
 				game->chain->mouse =2;
 			}
@@ -525,6 +549,7 @@ int main(void)
 				if(houseList[houseNum-1]->type==1)
 				{
 					unlockTier(2,recipeList);
+					
 					unlockTier(3,recipeList);
 					unlockHouse(recipeList, houseName,0); 
 					hasForge=1;
@@ -532,26 +557,61 @@ int main(void)
 				}
 				if(houseList[houseNum-1]->type == 4)
 				{
-					specialization = 1;
-					lockTier(3,recipeList);
+					specialization += 1;
+					specializations++;
+					if(specialization&8 != 8)
+						moveImageTo(natureButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&16 != 16)
+						moveImageTo(techButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&2 != 2)
+						moveImageTo(clothingButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&4 != 4)
+						moveImageTo(metalButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&1 != 1)
+						moveImageTo(plasticButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(loop==0 ||(loop ==1 && specializations>=2) || (loop == 2 && specializations>=3))
+						lockTier(3,recipeList);
 					unlockTier(4,recipeList);
-					growBuilding = houseList[houseNum-1]->image;
+					plasticBuilding = houseList[houseNum-1]->image;
 					unlockUpgradeTier(7,upgradeList);
 					wonderModifier++;
 				}
 				if(houseList[houseNum-1]->type == 5)
 				{
-					specialization = 2;
-					lockTier(3,recipeList);
+					specialization += 2;
+					specializations++;
+					if(specialization&8 != 8)
+						moveImageTo(natureButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&16 != 16)
+						moveImageTo(techButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&2 != 2)
+						moveImageTo(clothingButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&4 != 4)
+						moveImageTo(metalButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&1 != 1)
+						moveImageTo(plasticButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(loop==0 ||(loop ==1 && specializations>=2) || (loop == 2 && specializations>=3))
+						lockTier(3,recipeList);
 					unlockTier(4,recipeList);
-					growBuilding = houseList[houseNum-1]->image;
 					unlockUpgradeTier(6,upgradeList);
 					wonderModifier++;
 				}
 				if(houseList[houseNum-1]->type == 6)
 				{
-					specialization = 4;
-					lockTier(3,recipeList);
+					specialization += 8;
+					specializations++;
+					if(specialization&8 != 8)
+						moveImageTo(natureButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&16 != 16)
+						moveImageTo(techButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&2 != 2)
+						moveImageTo(clothingButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&4 != 4)
+						moveImageTo(metalButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&1 != 1)
+						moveImageTo(plasticButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(loop==0 ||(loop ==1 && specializations>=2) || (loop == 2 && specializations>=3))
+						lockTier(3,recipeList);
 					unlockTier(4,recipeList);
 					growBuilding = houseList[houseNum-1]->image;
 					unlockUpgradeTier(3,upgradeList);
@@ -560,19 +620,43 @@ int main(void)
 				}
 				if(houseList[houseNum-1]->type == 9)
 				{
-					specialization = 3;
-					lockTier(3,recipeList);
+					specialization += 4;
+					specializations++;
+					if(specialization&8 != 8)
+						moveImageTo(natureButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&16 != 16)
+						moveImageTo(techButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&2 != 2)
+						moveImageTo(clothingButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&4 != 4)
+						moveImageTo(metalButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&1 != 1)
+						moveImageTo(plasticButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(loop==0 ||(loop ==1 && specializations>=2) || (loop == 2 && specializations>=3))
+						lockTier(3,recipeList);
 					unlockTier(4,recipeList);
-					growBuilding = houseList[houseNum-1]->image;
+					mineBuilding = houseList[houseNum-1]->image;
 					unlockUpgradeTier(4,upgradeList);
 					wonderModifier++;
 				}
 				if(houseList[houseNum-1]->type == 11)
 				{
-					specialization = 5;
-					lockTier(3,recipeList);
+					specialization += 16;
+					specializations++;
+					if(specialization&8 != 8)
+						moveImageTo(natureButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&16 != 16)
+						moveImageTo(techButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&2 != 2)
+						moveImageTo(clothingButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&4 != 4)
+						moveImageTo(metalButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(specialization&1 != 1)
+						moveImageTo(plasticButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+					if(loop==0 ||(loop ==1 && specializations>=2) || (loop == 2 && specializations>=3))
+						lockTier(3,recipeList);
 					unlockTier(4,recipeList);
-					growBuilding = houseList[houseNum-1]->image;
+					techBuilding = houseList[houseNum-1]->image;
 					unlockUpgradeTier(5,upgradeList);
 					wonderModifier++;
 				}
@@ -654,6 +738,7 @@ int main(void)
 	{
 		clickable = 0;
 		attackable = 0;
+		grabable = 0;
 		getEvents(game->chain, game);
 		
 		if(!game->chain->close)
@@ -725,6 +810,7 @@ int main(void)
 			{
 				if(game->chain->mouse == 1)
 				{
+					
 					game->chain->mouse =2;
 					if(animWhistle == 0)
 					{
@@ -804,7 +890,7 @@ int main(void)
 						{
 							if(pendingItem == NULL)
 							{
-								if(specialization == 1)
+								if(specialization&1 == 1)
 								{
 									if(rand()%100==0)
 									{
@@ -1089,15 +1175,29 @@ int main(void)
 						{
 							game->chain->mouse = 2;
 							enemylist[i]->health -=playerDamage;
+							Mix_PlayChannel(1,attackSound, 0);
 						}
 						attackable = 1;
 					}
 					if((enemylist[i]->status ==2 && enemylist[i]->image->x<0) || enemylist[i]->health<=0)
 					{
+						
+						if(enemylist[i]->health <= 0)
+						{
+							if(rand()%10==0)
+							{
+								enemyObject = getItemByName("black_pointy",itemList);
+								moveImageTo(enemyObject->image,enemylist[i]->image->x-enemyObject->image->w/2+enemylist[i]->image->w/2,enemylist[i]->image->y);
+								addItemToLooseList(looseList,enemyObject,2,0);
+							}
+							Mix_PlayChannel(1,dieSound, 0);
+						}
 						if(enemylist[i]->health<=0 && enemylist[i]->item !=NULL)
 						{
 							moveImage(enemylist[i]->item->image,0,enemylist[i]->image->h);
 							addItemToLooseList(looseList,enemylist[i]->item,2,0);
+							
+					
 						}
 						for(int j=i+1;j<enemylistsize;j++)
 						{
@@ -1151,6 +1251,16 @@ int main(void)
 					if((enemylist[i]->status ==3 && enemylist[i]->image->x<0) || enemylist[i]->health<=0)
 					{
 						exists2=0;
+						if(enemylist[i]->health <= 0)
+						{
+							if(rand()%10==0)
+							{
+								enemyObject = getItemByName("black_blocky",itemList);
+								moveImageTo(enemyObject->image,enemylist[i]->image->x-enemyObject->image->w/2+enemylist[i]->image->w/2,enemylist[i]->image->y);
+								addItemToLooseList(looseList,enemyObject,2,0);
+							}
+							Mix_PlayChannel(1,dieSound, 0);
+						}
 						if(enemylist[i]->health<=0 && enemylist[i]->item !=NULL)
 						{
 							moveImage(enemylist[i]->item->image,0,enemylist[i]->image->h);
@@ -1172,6 +1282,7 @@ int main(void)
 				if(totalPals*10<pile->total && pile->total > 90)
 				{
 					enemylistsize++;
+					Mix_PlayChannel(1,spawnSound, 0);
 					if(enemylistsize>=enemylistcapacity)
 					{
 						enemylistcapacity*=2;
@@ -1191,6 +1302,7 @@ int main(void)
 				{
 					if(totalPals*2>totalCapacity && !exists2)
 					{
+						Mix_PlayChannel(1,spawnSound, 0);
 						enemylistsize++;
 						exists2=1;
 						if(enemylistsize>=enemylistcapacity)
@@ -1224,7 +1336,7 @@ int main(void)
 			//Enemy Behaviour End
 			
 			//Farm - growing items behaviour
-			if(specialization==4 && growItem != NULL)
+			if((specialization&8)==8 && growItem != NULL)
 			{
 				if(growTimer == 0)
 				{
@@ -1253,7 +1365,7 @@ int main(void)
 			//Farm Behaviour End
 			
 			//Mine Behaviour
-			if(specialization==3)
+			if((specialization&4)==4)
 			{
 				if(fuelLevel>0)
 				{
@@ -1269,7 +1381,7 @@ int main(void)
 						minetemp = getItemGroup(itemList,9,9999);
 						if(minetemp!=NULL)
 						{
-							moveImageTo(minetemp->image,growBuilding->x,growBuilding->y+growBuilding->h-minetemp->image->h);
+							moveImageTo(minetemp->image,mineBuilding->x,mineBuilding->y+mineBuilding->h-minetemp->image->h);
 							addItemToLooseList(looseList,minetemp,2,0);
 						}
 						minetemp = NULL;
@@ -1334,6 +1446,7 @@ int main(void)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
 				inMenu = 4;
 				game->chain->mouse = 2;
 				}
@@ -1343,6 +1456,7 @@ int main(void)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
 				inMenu = 1;
 				game->chain->mouse = 2;
 				}
@@ -1352,6 +1466,7 @@ int main(void)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
 				inMenu = 7;
 				game->chain->mouse = 2;
 				}
@@ -1361,6 +1476,7 @@ int main(void)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
 				inMenu = 3;
 				game->chain->mouse = 2;
 				}
@@ -1370,52 +1486,60 @@ int main(void)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
 				inMenu = 2;
 				game->chain->mouse = 2;
 				}
 				clickable = 1;
 			}
-			else if(!inMenu && isClicked(&natureButton->destPos,game,4) && specialization == 4)
+			else if(!inMenu && isClicked(&natureButton->destPos,game,4) && (specialization&8) == 8)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
 				inMenu = 5;
 				game->chain->mouse = 2;
 				}
 				clickable = 1;
 			}
-			else if(!inMenu && isClicked(&techButton->destPos,game,4) && specialization == 5)
+			else if(!inMenu && isClicked(&techButton->destPos,game,4) && (specialization&16) == 16)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
+					Mix_HaltChannel(0);
+					Mix_PlayChannel(0,minigameMusic, -1);
 				inMenu = 12;
 				game->chain->mouse = 2;
 				}
 				clickable = 1;
 			}
-			else if(!inMenu && isClicked(&clothingButton->destPos,game,4) && specialization == 2)
+			else if(!inMenu && isClicked(&clothingButton->destPos,game,4) && (specialization&2) == 2)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
 				inMenu = 10;
 				game->chain->mouse = 2;
 				}
 				clickable = 1;
 			}
-			else if(!inMenu && isClicked(&metalButton->destPos,game,4) && specialization == 3)
+			else if(!inMenu && isClicked(&metalButton->destPos,game,4) && (specialization&4) == 4)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
 				inMenu = 8;
 				game->chain->mouse = 2;
 				}
 				clickable = 1;
 			}
 			
-			else if(!inMenu && isClicked(&plasticButton->destPos,game,4) && specialization == 1)
+			else if(!inMenu && isClicked(&plasticButton->destPos,game,4) && (specialization&1) == 1)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
 				inMenu = 11;
 				game->chain->mouse = 2;
 				}
@@ -1426,6 +1550,7 @@ int main(void)
 			{
 				if(game->chain->mouse == 1 )
 				{
+					Mix_PlayChannel(1,buttonSound, 0);
 				inMenu = 6;
 				game->chain->mouse = 2;
 				}
@@ -1494,6 +1619,7 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -1534,6 +1660,7 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -1546,6 +1673,7 @@ int main(void)
 					
 					if(grabbed!=NULL)
 					{
+						Mix_PlayChannel(1,buttonSound, 0);
 						if((selectionInfo & 3)==1)
 						{
 							consumption = 1;
@@ -1563,7 +1691,7 @@ int main(void)
 						}
 						for(i=0;i<consumption;i++)
 						{
-							flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w/2,game->boundingBox.h,i*4);
+							flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w/2,game->boundingBox.h,i*4,0);
 							levels[0]+=grabbed->item->plastic;
 							levels[1]+=grabbed->item->fabric;
 							levels[2]+=grabbed->item->metal;
@@ -1587,6 +1715,7 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -1597,15 +1726,131 @@ int main(void)
 					drawImage(close,game);
 					if(game->chain->mouse==1 && isClicked(&close->destPos,game,3))
 					{
+						
 						game->chain->mouse = 2;
 					}
-					else if(craft>0)
+					else if(craft>0 && craft !=13)
 					{
 						inMenu = 7;
 						redrawMenu = 1;
 						houseMove = 1;
 						movingHouse = newHouseByName(game,0,0,recipeList->list[craft-1]->name);
 						game->chain->mouse = 2;
+					}
+					else if (craft == 13)
+					{
+						loop++;
+						clearToLoop(pile,loop);
+						specialization = 0;
+						specializations = 0;
+						Mix_PlayChannel(1,loopSound, 0);
+						palImage = loadImage("images/pals/1.png",8,3,game);
+						growItem = NULL;
+						growBuilding= NULL;
+						mineItem = NULL;
+						mineBuilding= NULL;
+						plasticItem = NULL;
+						plasticBuilding= NULL;
+						techItem = NULL;
+						techBuilding= NULL;
+						flumfEatDelay = 0;
+						growAutoHarvest = 0;
+						growCanAutoReplant = 0;
+						growAutoReplant = 0;
+						growTimerMax = 400;
+						growTimerMods = 0;
+						gumballTimer = 0;
+						gumballDelay = 0;
+						for(i=0;i<5;i++)
+						{
+							levels[i]= 0;
+						}	
+						activatedUpgrades = calloc(sizeof(char),upgradeList->size);
+						activatedClothing = calloc(sizeof(char),clothingList->size);
+
+						enemylistsize = 0;
+
+						endTimer = 50;
+
+						totalPals = 0;
+						totalCapacity = 0;
+						hasForge = 0;
+						hasUpgrade = 0;
+						queue = initProdQueue();
+						pendingItem = NULL;
+						flumfEatActive = 0;
+						houseList = NULL;
+						houseNum = 0;
+						flumfEntropy = 0;
+						flumfDesire = 16;
+						scrolly = 0;
+						canScroll = 0;
+						animWhistle = 0;
+						returnTiming = 0;
+						queuedEggs = NULL;
+						palsPullingPals = malloc(sizeof(Adventurer*)*palpullcapacity);
+						palpullcapacity = 10;
+						palpullsize = 0;
+						eggSize = 0;
+						visEggSize = 0;
+						looseList = initLooseList();
+						inMenu = 0;
+						craft = 0; 
+						avgmoxie = 0;
+						wonderTeaSet = 0;
+						wonderModifier = 0;
+						currOutPals = 0;
+						currTotalPals = 0;
+						currExploringPals = 0;
+						chutzpahGravyBoat = 0;
+						pendingChutzpah = 0;
+						redrawHouses = 1; 
+						redrawMenu = 1;
+						fuelLevel = 0;
+						mineTimer =0;
+						mineAutoConsume = 0;
+						mineCanAutoConsume = 0;
+						unlockUpgradeTier(1,upgradeList);
+						lockUpgradeTier(2,upgradeList);
+						lockUpgradeTier(3,upgradeList);
+						lockUpgradeTier(4,upgradeList);
+						lockUpgradeTier(5,upgradeList);
+						lockUpgradeTier(6,upgradeList);
+						lockUpgradeTier(7,upgradeList);
+						lockUpgradeTier(8,upgradeList);
+						lockUpgradeTier(9,upgradeList);
+						lockUpgradeTier(10,upgradeList);
+
+						unlockTier(1,recipeList);
+						lockTier(2,recipeList);
+						lockTier(3,recipeList);
+						lockTier(4,recipeList);
+
+						moveImageTo(natureButton,(natureButton->w+10)*2,(natureButton->h+10));
+						moveImageTo(techButton,(natureButton->w+10)*2,(natureButton->h+10));
+						moveImageTo(clothingButton,(natureButton->w+10)*2,(natureButton->h+10));
+						moveImageTo(metalButton,(natureButton->w+10)*2,(natureButton->h+10));
+						moveImageTo(plasticButton,(natureButton->w+10)*2,(natureButton->h+10));
+
+						setToFrame(background,0,loop);
+						setToFrame(bkgrnd,loop,0);
+						setToFrame(flumfImg,loop,0);
+						setToLoop(itemList,loop);
+
+
+						houseNum++;
+						houseList = realloc(houseList,sizeof(House*)*houseNum);
+						houseList[houseNum-1] = newHouse(game,housex,housey,3);
+						totalCapacity+=houseList[houseNum-1]->capacity;
+						for(i=0;i<10;i++)
+						{
+							addPaltoHouse(houseList[houseNum-1],newAdventurer(1,game),game);
+							currTotalPals++;
+							totalPals++;
+						}
+
+						inMenu = 13;
+						
 					}
 					
 					setLayer(game,2);
@@ -1618,6 +1863,7 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -1663,7 +1909,7 @@ int main(void)
 						}
 						for(i=0;i<consumption;i++)
 						{
-							flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w-140,game->boundingBox.h-130-grabbed->item->image->h/2,i*4);
+							flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w-140,game->boundingBox.h-130-grabbed->item->image->h/2,i*4,0);
 							if(flumfEatDelay==0)
 							{
 								flumfEatDelay = (game->boundingBox.w-140-game->chain->vx)/7-10;
@@ -1709,6 +1955,7 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -1742,7 +1989,8 @@ int main(void)
 						grabbed = drawPileDetailSub(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,0,0,0,1,0,&maxscroll, &clickable,&selectionInfo ,selectionMenu, ordering);
 						if(grabbed!=NULL)
 						{
-							flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w,game->boundingBox.h/2,i*4);
+							Mix_PlayChannel(1,buttonSound, 0);
+							flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w,game->boundingBox.h/2,i*4,0);
 
 							grabbed->size--;
 							growItem = grabbed->item;
@@ -1774,6 +2022,7 @@ int main(void)
 							{
 								if(game->chain->mouse==1)
 								{
+									Mix_PlayChannel(1,buttonSound, 0);
 									moveImageTo(growItem->image,growBuilding->x,growBuilding->y+growBuilding->h-growItem->image->h);
 									addItemToLooseList(looseList,copyItem(growItem),2,0);
 									addItemToLooseList(looseList,copyItem(growItem),2,0);
@@ -1817,6 +2066,7 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -1910,7 +2160,8 @@ int main(void)
 					grabbed = drawPileDetail(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,&maxscroll, &clickable,&selectionInfo ,selectionMenu, ordering);
 					if(grabbed!=NULL)
 					{
-						flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w,game->boundingBox.h/2,i*4);
+						Mix_PlayChannel(1,buttonSound, 0);
+						flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,game->boundingBox.w,game->boundingBox.h/2,i*4,0);
 
 						grabbed->size--;
 						fuelLevel += grabbed->item->value;
@@ -1930,6 +2181,7 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -2001,6 +2253,7 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -2066,26 +2319,61 @@ int main(void)
 									}
 									if(movingHouse->type== 4)
 									{
-										specialization = 1;
-										lockTier(3,recipeList);
+										specialization += 1;
+										specializations++;
+										if((specialization&8) != 8)
+											moveImageTo(natureButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&16) != 16)
+											moveImageTo(techButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&2) != 2)
+											moveImageTo(clothingButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&4) != 4)
+											moveImageTo(metalButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&1) != 1)
+											moveImageTo(plasticButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if(loop==0 ||(loop ==1 && specializations>=2) || (loop == 2 && specializations>=3))
+											lockTier(3,recipeList);
 										unlockTier(4,recipeList);
-										growBuilding = houseList[houseNum-1]->image;
+										plasticBuilding = houseList[houseNum-1]->image;
 										unlockUpgradeTier(7,upgradeList);
 										wonderModifier++;
 									}
 									if(movingHouse->type== 5)
 									{
-										specialization = 2;
-										lockTier(3,recipeList);
+										specialization += 2;
+										specializations++;
+										if((specialization&8) != 8)
+											moveImageTo(natureButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&16) != 16)
+											moveImageTo(techButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&2) != 2)
+											moveImageTo(clothingButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&4) != 4)
+											moveImageTo(metalButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&1) != 1)
+											moveImageTo(plasticButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if(loop==0 ||(loop ==1 && specializations>=2) || (loop == 2 && specializations>=3))
+											lockTier(3,recipeList);
 										unlockTier(4,recipeList);
-										growBuilding = houseList[houseNum-1]->image;
 										unlockUpgradeTier(6,upgradeList);
 										wonderModifier++;
 									}
 									if(movingHouse->type== 6)
 									{
-										specialization = 4;
-										lockTier(3,recipeList);
+										specialization += 8;
+										specializations++;
+										if((specialization&8) != 8)
+											moveImageTo(natureButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&16) != 16)
+											moveImageTo(techButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&2) != 2)
+											moveImageTo(clothingButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&4) != 4)
+											moveImageTo(metalButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&1) != 1)
+											moveImageTo(plasticButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if(loop==0 ||(loop ==1 && specializations>=2) || (loop == 2 && specializations>=3))
+											lockTier(3,recipeList);
 										
 										growBuilding = houseList[houseNum-1]->image;
 										unlockUpgradeTier(3,upgradeList);
@@ -2094,18 +2382,42 @@ int main(void)
 									}
 									if(movingHouse->type== 9)
 									{
-										specialization = 3;
-										lockTier(3,recipeList);
-										growBuilding = houseList[houseNum-1]->image;
+										specialization += 4;
+										specializations++;
+										if((specialization&8) != 8)
+											moveImageTo(natureButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&16) != 16)
+											moveImageTo(techButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&2) != 2)
+											moveImageTo(clothingButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&4) != 4)
+											moveImageTo(metalButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&1) != 1)
+											moveImageTo(plasticButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if(loop==0 ||(loop ==1 && specializations>=2) || (loop == 2 && specializations>=3))
+											lockTier(3,recipeList);
+										mineBuilding = houseList[houseNum-1]->image;
 										unlockUpgradeTier(4,upgradeList);
 										wonderModifier++;
 									}
 									if(movingHouse->type == 11)
 									{
-										specialization = 5;
-										lockTier(3,recipeList);
+										specialization += 16;
+										specializations++;
+										if((specialization&8) != 8)
+											moveImageTo(natureButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&16) != 16)
+											moveImageTo(techButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&2) != 2)
+											moveImageTo(clothingButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&4) != 4)
+											moveImageTo(metalButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if((specialization&1) != 1)
+											moveImageTo(plasticButton,(techButton->w+10)*(2+specializations)%3,(techButton->h+10)*(2+specializations)/3);
+										if(loop==0 ||(loop ==1 && specializations>=2) || (loop == 2 && specializations>=3))
+											lockTier(3,recipeList);
 										unlockTier(4,recipeList);
-										growBuilding = houseList[houseNum-1]->image;
+										techBuilding = houseList[houseNum-1]->image;
 										unlockUpgradeTier(5,upgradeList);
 										wonderModifier++;
 									}
@@ -2136,6 +2448,7 @@ int main(void)
 							setToFrame(movingHouse->image,2,0);
 							if(game->chain->mouse==1)
 							{
+								Mix_PlayChannel(1,buttonSound, 0);
 								game->chain->mouse = 2;
 								if(houseMove==2)
 								{
@@ -2161,6 +2474,7 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -2257,6 +2571,7 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -2288,6 +2603,7 @@ int main(void)
 					grabbed = drawPileDetailSingle(pile,game,font,&scrolly, &canScroll,hasForge,tinyResources,&maxscroll, &clickable,&selectionInfo ,selectionMenu, ordering,"flumf-coin");
 					if(grabbed!=NULL)
 					{
+						Mix_PlayChannel(1,buttonSound, 0);
 						if((selectionInfo & 3)==1)
 						{
 							consumption = 1;
@@ -2305,18 +2621,18 @@ int main(void)
 						}
 						for(i=0;i<consumption;i++)
 						{
-							flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,gumballCover->x+gumballCover->w/2,gumballCover->y,i*4);
+							flyingItems = newFlyingItem(flyingItems,grabbed->item->image,game->chain->vx,game->chain->vy-grabbed->item->image->h/2,gumballCover->x+gumballCover->w/2,gumballCover->y,i*4,0);
 							
 							grabbed->size--;
 							
-							growItem =getItemGroup(itemList,rand()%6,9999);
+							plasticItem =getItemGroup(itemList,rand()%6,9999);
 							
-							moveImageTo(growItem->image,growBuilding->x,growBuilding->y+growBuilding->h-growItem->image->h);
-							flyingItems = newFlyingItem(flyingItems,copyItem(growItem)->image,gumballCover->x+gumballCover->w-growItem->image->h,gumballCover->y,game->boundingBox.w,gumballCover->y-95,i*4+(gumballCover->x+gumballCover->w/2-game->chain->vx)/7);
+							moveImageTo(plasticItem->image,plasticBuilding->x,plasticBuilding->y+plasticBuilding->h-plasticItem->image->h);
+							flyingItems = newFlyingItem(flyingItems,copyItem(plasticItem)->image,gumballCover->x+gumballCover->w-plasticItem->image->h,gumballCover->y,gumballCover->x+gumballCover->w-plasticItem->image->h,gumballCover->y-115,i*4+(gumballCover->x+gumballCover->w/2-game->chain->vx)/7,1);
 							if(gumballTimer == 0)
 								gumballTimer = (gumballCover->x+gumballCover->w/2-game->chain->vx)/7;
 							gumballDelay+=8;
-							addItemToLooseList(looseList,growItem,2,0);
+							addItemToLooseList(looseList,plasticItem,2,0);
 						}
 						grabbed = NULL;
 					}
@@ -2335,6 +2651,9 @@ int main(void)
 					{
 						if(game->chain->mouse==1)
 						{
+							Mix_PlayChannel(1,buttonSound, 0);
+							Mix_HaltChannel(0);
+							Mix_PlayChannel(0,backgroundMusic, -1);
 							inMenu = 0;
 							game->chain->mouse = 2;
 							redrawMenu = 1;
@@ -2343,17 +2662,52 @@ int main(void)
 					}
 					drawBackgroundTile(game,bkgrnd);
 					moveImageTo(gameBox,game->boundingBox.w/2-gameBox->w/2,game->boundingBox.h-gameBox->h);
-					drawImage(gameBox,game);
+					i = cookieGame->score;
 					cookieGame->x = gameBox->x + 104;
 					cookieGame->y = gameBox->y + 96;
-					processCookieGame(cookieGame,game);
+					processCookieGame(cookieGame,game, &clickable, &grabable);
+					drawImage(gameBox,game);
+					if(i<cookieGame->score)
+					{
+						fprintf(stderr,"New Item\n");
+						techItem =getItemGroup(itemList,rand()%6,9999);
+						
+						moveImageTo(techItem->image,techBuilding->x,techBuilding->y+techBuilding->h-techItem->image->h);
+						flyingItems = newFlyingItem(flyingItems,copyItem(techItem)->image,game->boundingBox.w*5/6,game->boundingBox.h,game->boundingBox.w*5/6,0,0,1);
+						
+						techItem =getItemGroup(itemList,rand()%6,9999);
+						
+						moveImageTo(techItem->image,techBuilding->x,techBuilding->y+techBuilding->h-techItem->image->h);
+						flyingItems = newFlyingItem(flyingItems,copyItem(techItem)->image,game->boundingBox.w*5/6,game->boundingBox.h,game->boundingBox.w*5/6,0,8,1);
+						
+						techItem =getItemGroup(itemList,rand()%6,9999);
+						
+						moveImageTo(techItem->image,techBuilding->x,techBuilding->y+techBuilding->h-techItem->image->h);
+						flyingItems = newFlyingItem(flyingItems,copyItem(techItem)->image,game->boundingBox.w*5/6,game->boundingBox.h,game->boundingBox.w*5/6,0,16,1);
+					}
+					flyingItems = processFlyingItems(flyingItems,game);
 					drawImage(close,game);
 					setLayer(game,2);
+				}
+				else if(inMenu == 13)
+				{
+					setLayer(game,4);
+					clearLayer(game);
+					moveImageTo(looplaser,flumfAnim->x+36,flumfAnim->y+12);
+					rotateImage(looplaser,5);
+					drawFeedBackground(game,bkgrnd,flumfAnim, menuImg,1,0);
+					drawImage(looplaser,game);
+					endTimer--;
+					if(endTimer == 0)
+					{
+						inMenu = 0;
+					}
 				}
 
 			}
 			if(!inMenu)
 			{
+				flyingItems = NULL;
 				if(redrawMenu == 1)
 				{
 					setLayer(game,4);
@@ -2367,15 +2721,15 @@ int main(void)
 						drawImage(upgradeButton,game);
 					if(hasForge)
 						drawImage(forgeButton,game);
-					if(specialization == 1)
+					if((specialization&1) == 1)
 						drawImage(plasticButton,game);
-					if(specialization == 2)
+					if((specialization&2) == 2)
 						drawImage(clothingButton,game);
-					if(specialization == 3)
+					if((specialization&4) == 4)
 						drawImage(metalButton,game);
-					if(specialization == 4)
+					if((specialization&8) == 8)
 						drawImage(natureButton,game);
-					if(specialization == 5)
+					if((specialization&16) == 16)
 						drawImage(techButton,game);
 					if(game->layerList[0]->scrollDest.x < -scrollmin)
 						drawImage(leftArrow,game);
@@ -2534,6 +2888,10 @@ int main(void)
 		{
 			moveImage(cursor,-16,-22);
 			setToFrame(cursor,2,0);
+		}
+		else if(grabable)
+		{
+			setToFrame(cursor,3,0);
 		}
 		else if(clickable)
 		{
